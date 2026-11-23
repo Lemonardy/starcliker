@@ -1,0 +1,474 @@
+import asyncio
+import json
+import logging
+from aiohttp import web
+import aiosqlite
+from aiogram import Bot, Dispatcher, F
+from aiogram.filters import CommandStart
+from aiogram.types import Message, PreCheckoutQuery, LabeledPrice, WebAppInfo, InlineKeyboardMarkup, InlineKeyboardButton
+
+# === НАСТРОЙКИ ===
+BOT_TOKEN = "8824233352:AAFxJIWHgoOb14nV6UgqON3IpJiS4jEYnz0"
+WEBAPP_URL = "https://ngrok-free.app"  # Ссылка на ваш сервер (обязательно HTTPS)
+PORT = 8080
+
+logging.basicConfig(level=logging.INFO)
+bot = Bot(token=BOT_TOKEN)
+dp = Dispatcher()
+
+# Конфигурация донат-паков
+DONATE_PACKS = {
+    "pack1": {"title": "Мешок StarCoins", "stars": 10, "coins": 5000},
+    "pack2": {"title": "Сундук магната", "stars": 50, "coins": 50000},
+}
+
+# === ВСТРОЕННЫЙ ИНТЕРФЕЙС ИГРЫ (HTML/CSS/JS) ===
+HTML_PAGE = """<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>StarCoins Clicker</title>
+    <script src="https://telegram.org"></script>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e24;
+            --primary: #ffb703;
+            --text: #ffffff;
+            --text-muted: #8e8e93;
+        }
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        body {
+            margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-color); color: var(--text);
+            display: flex; flex-direction: column; height: 100vh; overflow: hidden;
+        }
+        .header { text-align: center; padding: 20px 15px 10px; }
+        .balance-title { font-size: 14px; color: var(--text-muted); }
+        .balance { font-size: 38px; font-weight: 800; color: var(--primary); margin: 5px 0; }
+        .income { font-size: 14px; color: #4ade80; font-weight: 600; }
+
+        .tap-area {
+            flex: 1; display: flex; justify-content: center; align-items: center; position: relative;
+        }
+        .star-btn {
+            width: 210px; height: 210px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,183,3,0.25) 0%, rgba(18,18,18,0) 70%);
+            display: flex; justify-content: center; align-items: center;
+            font-size: 130px; cursor: pointer; transition: transform 0.08s ease;
+        }
+        .star-btn:active { transform: scale(0.92); }
+        .floating-num {
+            position: absolute; font-size: 24px; font-weight: bold; color: var(--primary);
+            pointer-events: none; animation: floatUp 0.8s ease-out forwards;
+        }
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-80px); }
+        }
+
+        .tabs {
+            display: flex; background: var(--card-bg); padding: 8px; gap: 8px;
+            border-top-left-radius: 20px; border-top-right-radius: 20px;
+        }
+        .tab {
+            flex: 1; padding: 10px; text-align: center; border-radius: 12px;
+            font-weight: 600; font-size: 14px; cursor: pointer; background: transparent; color: var(--text-muted);
+        }
+        .tab.active { background: #2b2b36; color: var(--text); }
+
+        .content {
+            height: 42vh; background: var(--card-bg); overflow-y: auto; padding: 10px 15px 25px;
+        }
+        .item {
+            display: flex; justify-content: space-between; align-items: center;
+            background: #2b2b36; padding: 12px 15px; border-radius: 14px; margin-bottom: 10px;
+        }
+        .item-info { display: flex; align-items: center; gap: 12px; }
+        .item-icon { font-size: 30px; }
+        .item-title { font-weight: 700; font-size: 15px; }
+        .item-desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+        .buy-btn {
+            background: var(--primary); color: #000; border: none; padding: 8px 14px;
+            border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer;
+        }
+        .buy-btn:disabled { background: #444; color: #888; cursor: not-allowed; }
+        .donate-btn { background: #3b82f6; color: #fff; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="balance-title">Твой баланс StarCoins</div>
+        <div class="balance" id="balance">Загрузка...</div>
+        <div class="income">+<span id="perSec">0</span> StarCoins / сек</div>
+    </div>
+
+    <div class="tap-area" id="tapArea">
+        <div class="star-btn" id="starBtn">⭐</div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab('gifts')">🎁 Подарки</div>
+        <div class="tab" onclick="switchTab('upgrades')">⚡ Улучшения</div>
+        <div class="tab" onclick="switchTab('donate')">💫 Донат</div>
+    </div>
+
+    <div class="content" id="shopContent"></div>
+
+<script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+
+    const userId = tg.initDataUnsafe?.user?.id || 12345;
+
+    let state = {
+        coins: 0,
+        tapPower: 1,
+        gifts: { teddy: 0, cake: 0, rocket: 0, ring: 0 },
+        upgrades: { multiTap: 0 }
+    };
+
+    let currentTab = 'gifts';
+    let needsSave = false;
+
+    const GIFTS_DB = [
+        { id: 'teddy', icon: '🧸', name: 'Плюшевый мишка', baseCost: 50, income: 1 },
+        { id: 'cake', icon: '🎂', name: 'Праздничный торт', baseCost: 300, income: 8 },
+        { id: 'rocket', icon: '🚀', name: 'Мини-ракета', baseCost: 1500, income: 45 },
+        { id: 'ring', icon: '💍', name: 'Кольцо со звездой', baseCost: 10000, income: 320 }
+    ];
+
+    const UPGRADES_DB = [
+        { id: 'multiTap', icon: '👆', name: 'Сила тапа (+1 за клик)', baseCost: 100, power: 1 }
+    ];
+
+    const DONATE_DB = [
+        { id: 'pack1', icon: '💰', name: 'Мешок StarCoins', desc: '+5,000 StarCoins мгновенно', stars: 10, rewardCoins: 5000 },
+        { id: 'pack2', icon: '👑', name: 'Сундук магната', desc: '+50,000 StarCoins мгновенно', stars: 50, rewardCoins: 50000 }
+    ];
+
+    async function loadGame() {
+        try {
+            const res = await fetch(`/api/state?user_id=${userId}`);
+            if (res.ok) {
+                state = await res.json();
+                updateUI();
+                renderShop();
+            }
+        } catch (e) {
+            console.error("Ошибка загрузки:", e);
+        }
+    }
+
+    async function saveGameToServer() {
+        if (!needsSave) return;
+        needsSave = false;
+        try {
+            await fetch('/api/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: userId, ...state })
+            });
+        } catch (e) {
+            console.error("Ошибка сохранения:", e);
+        }
+    }
+
+    function getIncomePerSec() {
+        return GIFTS_DB.reduce((total, g) => total + (state.gifts[g.id] * g.income), 0);
+    }
+
+    function getCost(baseCost, level) {
+        return Math.floor(baseCost * Math.pow(1.35, level));
+    }
+
+    document.getElementById('starBtn').addEventListener('pointerdown', (e) => {
+        state.coins += state.tapPower;
+        needsSave = true;
+        if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+        showFloatingNumber(e.clientX, e.clientY, `+${state.tapPower}`);
+        updateUI();
+    });
+
+    function showFloatingNumber(x, y, text) {
+        const el = document.createElement('div');
+        el.className = 'floating-num';
+        el.innerText = text;
+        el.style.left = `${x - 15}px`;
+        el.style.top = `${y - 30}px`;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 800);
+    }
+
+    function switchTab(tab) {
+        currentTab = tab;
+        document.querySelectorAll('.tab').forEach((el, idx) => {
+            el.classList.toggle('active', ['gifts', 'upgrades', 'donate'][idx] === tab);
+        });
+        renderShop();
+    }
+
+    function buyGift(id) {
+        const gift = GIFTS_DB.find(g => g.id === id);
+        const cost = getCost(gift.baseCost, state.gifts[id]);
+        if (state.coins >= cost) {
+            state.coins -= cost;
+            state.gifts[id]++;
+            needsSave = true;
+            saveGameToServer();
+            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            updateUI();
+            renderShop();
+        }
+    }
+
+    function buyUpgrade(id) {
+        const upg = UPGRADES_DB.find(u => u.id === id);
+        const cost = getCost(upg.baseCost, state.upgrades[id]);
+        if (state.coins >= cost) {
+            state.coins -= cost;
+            state.upgrades[id]++;
+            state.tapPower += upg.power;
+            needsSave = true;
+            saveGameToServer();
+            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            updateUI();
+            renderShop();
+        }
+    }
+
+    async function buyDonate(packId) {
+        try {
+            const res = await fetch('/api/invoice', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: userId, pack_id: packId })
+            });
+            const data = await res.json();
+            
+            if (data.invoice_link) {
+                tg.openInvoice(data.invoice_link, async (status) => {
+                    if (status === 'paid') {
+                        await loadGame();
+                        if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                    }
+                });
+            }
+        } catch (e) {
+            alert("Ошибка при создании счёта");
+        }
+    }
+
+    function renderShop() {
+        const container = document.getElementById('shopContent');
+        container.innerHTML = '';
+
+        if (currentTab === 'gifts') {
+            GIFTS_DB.forEach(g => {
+                const count = state.gifts[g.id];
+                const cost = getCost(g.baseCost, count);
+                container.innerHTML += `
+                    <div class="item">
+                        <div class="item-info">
+                            <div class="item-icon">${g.icon}</div>
+                            <div>
+                                <div class="item-title">${g.name} (ур. ${count})</div>
+                                <div class="item-desc">+${g.income} StarCoins/сек</div>
+                            </div>
+                        </div>
+                        <button class="buy-btn" ${state.coins < cost ? 'disabled' : ''} onclick="buyGift('${g.id}')">
+                            ${cost} SC
+                        </button>
+                    </div>`;
+            });
+        } else if (currentTab === 'upgrades') {
+            UPGRADES_DB.forEach(u => {
+                const lvl = state.upgrades[u.id];
+                const cost = getCost(u.baseCost, lvl);
+                container.innerHTML += `
+                    <div class="item">
+                        <div class="item-info">
+                            <div class="item-icon">${u.icon}</div>
+                            <div>
+                                <div class="item-title">${u.name}</div>
+                                <div class="item-desc">Уровень: ${lvl}</div>
+                            </div>
+                        </div>
+                        <button class="buy-btn" ${state.coins < cost ? 'disabled' : ''} onclick="buyUpgrade('${u.id}')">
+                            ${cost} SC
+                        </button>
+                    </div>`;
+            });
+        } else if (currentTab === 'donate') {
+            DONATE_DB.forEach(d => {
+                container.innerHTML += `
+                    <div class="item">
+                        <div class="item-info">
+                            <div class="item-icon">${d.icon}</div>
+                            <div>
+                                <div class="item-title">${d.name}</div>
+                                <div class="item-desc">${d.desc}</div>
+                            </div>
+                        </div>
+                        <button class="buy-btn donate-btn" onclick="buyDonate('${d.id}')">
+                            ${d.stars} ⭐
+                        </button>
+                    </div>`;
+            });
+        }
+    }
+
+    function updateUI() {
+        document.getElementById('balance').innerText = Math.floor(state.coins).toLocaleString();
+        document.getElementById('perSec').innerText = getIncomePerSec().toLocaleString();
+    }
+
+    setInterval(() => {
+        const income = getIncomePerSec();
+        if (income > 0) {
+            state.coins += income;
+            needsSave = true;
+            updateUI();
+            renderShop();
+        }
+    }, 1000);
+
+    setInterval(saveGameToServer, 3000);
+
+    loadGame();
+</script>
+</body>
+</html>
+"""
+
+# === БАЗА ДАННЫХ (SQLite) ===
+async def init_db():
+    async with aiosqlite.connect("game.db") as db:
+        await db.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                user_id INTEGER PRIMARY KEY,
+                coins REAL DEFAULT 0,
+                tap_power INTEGER DEFAULT 1,
+                gifts TEXT DEFAULT '{"teddy":0,"cake":0,"rocket":0,"ring":0}',
+                upgrades TEXT DEFAULT '{"multiTap":0}'
+            )
+        """)
+        await db.commit()
+
+async def get_or_create_user(user_id: int):
+    async with aiosqlite.connect("game.db") as db:
+        cursor = await db.execute("SELECT coins, tap_power, gifts, upgrades FROM users WHERE user_id = ?", (user_id,))
+        row = await cursor.fetchone()
+        if not row:
+            await db.execute("INSERT INTO users (user_id) VALUES (?)", (user_id,))
+            await db.commit()
+            return {"coins": 0, "tapPower": 1, "gifts": {"teddy": 0, "cake": 0, "rocket": 0, "ring": 0}, "upgrades": {"multiTap": 0}}
+        return {
+            "coins": row[0],
+            "tapPower": row[1],
+            "gifts": json.loads(row[2]),
+            "upgrades": json.loads(row[3])
+        }
+
+# === ЛОГИКА TELEGRAM БОТА ===
+@dp.message(CommandStart())
+async def cmd_start(message: Message):
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="⭐ Играть в StarCoins", web_app=WebAppInfo(url=WEBAPP_URL))]
+    ])
+    await message.answer(
+        "Добро пожаловать в **StarCoins Clicker**!\nТапай по звезде, покупай подарки и копи валюту каждую секунду.",
+        reply_markup=kb,
+        parse_mode="Markdown"
+    )
+
+@dp.pre_checkout_query()
+async def pre_checkout(query: PreCheckoutQuery):
+    await query.answer(ok=True)
+
+@dp.message(F.successful_payment)
+async def successful_payment(message: Message):
+    payload = message.successful_payment.invoice_payload
+    pack_id, user_id_str = payload.split(":")
+    user_id = int(user_id_str)
+    pack = DONATE_PACKS.get(pack_id)
+
+    if pack:
+        async with aiosqlite.connect("game.db") as db:
+            await db.execute("UPDATE users SET coins = coins + ? WHERE user_id = ?", (pack["coins"], user_id))
+            await db.commit()
+        await message.answer(f"🎉 Оплата прошла! На ваш баланс начислено **{pack['coins']:,} StarCoins**!", parse_mode="Markdown")
+
+# === ВЕБ-СЕРВЕР И API ДЛЯ ИГРЫ ===
+async def serve_index(request):
+    return web.Response(text=HTML_PAGE, content_type="text/html")
+
+async def api_get_state(request):
+    user_id = int(request.query.get("user_id", 0))
+    if not user_id:
+        return web.json_response({"error": "No user_id"}, status=400)
+    data = await get_or_create_user(user_id)
+    return web.json_response(data)
+
+async def api_save_state(request):
+    body = await request.json()
+    user_id = int(body.get("user_id", 0))
+    if not user_id:
+        return web.json_response({"error": "No user_id"}, status=400)
+    
+    async with aiosqlite.connect("game.db") as db:
+        await db.execute("""
+            UPDATE users 
+            SET coins = ?, tap_power = ?, gifts = ?, upgrades = ?
+            WHERE user_id = ?
+        """, (
+            body["coins"],
+            body["tapPower"],
+            json.dumps(body["gifts"]),
+            json.dumps(body["upgrades"]),
+            user_id
+        ))
+        await db.commit()
+    return web.json_response({"status": "ok"})
+
+async def api_create_invoice(request):
+    body = await request.json()
+    user_id = int(body.get("user_id", 0))
+    pack_id = body.get("pack_id")
+    pack = DONATE_PACKS.get(pack_id)
+
+    if not user_id or not pack:
+        return web.json_response({"error": "Invalid data"}, status=400)
+
+    invoice_link = await bot.create_invoice_link(
+        title=pack["title"],
+        description=f"Мгновенное пополнение на {pack['coins']} StarCoins",
+        payload=f"{pack_id}:{user_id}",
+        provider_token="",
+        currency="XTR",
+        prices=[LabeledPrice(label="StarCoins", amount=pack["stars"])]
+    )
+    return web.json_response({"invoice_link": invoice_link})
+
+# === ЗАПУСК ===
+async def main():
+    await init_db()
+    
+    app = web.Application()
+    app.router.add_get("/", serve_index)
+    app.router.add_get("/api/state", api_get_state)
+    app.router.add_post("/api/save", api_save_state)
+    app.router.add_post("/api/invoice", api_create_invoice)
+
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, "0.0.0.0", PORT)
+    await site.start()
+    
+    logging.info(f"Сервер запущен на порту {PORT}")
+    await dp.start_polling(bot)
+
+if __name__ == "__main__":
+    asyncio.run(main())
