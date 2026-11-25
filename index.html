@@ -12,23 +12,28 @@
             background: radial-gradient(circle at top, #1e293b, #090d16);
             color: #fff; display: flex; flex-direction: column; height: 100vh; overflow: hidden;
         }
-        .top-panel { padding: 18px; text-align: center; }
+        .top-panel { padding: 14px 16px 8px; text-align: center; position: relative; }
+        .reset-btn {
+            position: absolute; right: 14px; top: 16px;
+            background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #fca5a5; border-radius: 10px; padding: 6px 10px; font-size: 12px; cursor: pointer;
+        }
         .counter-box {
             display: inline-flex; align-items: center; gap: 10px;
             background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(251, 191, 36, 0.35);
-            padding: 10px 24px; border-radius: 99px; box-shadow: 0 0 25px rgba(251, 191, 36, 0.2);
+            padding: 8px 22px; border-radius: 99px; box-shadow: 0 0 25px rgba(251, 191, 36, 0.2);
         }
         .bal-num {
-            font-size: 34px; font-weight: 900;
+            font-size: 28px; font-weight: 900;
             background: linear-gradient(180deg, #fff7ed, #fbbf24);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
-        .sub-stats { font-size: 13px; color: #94a3b8; margin-top: 8px; }
-        .screen { flex: 1; overflow-y: auto; padding: 14px; display: none; }
+        .sub-stats { font-size: 13px; color: #94a3b8; margin-top: 6px; }
+        .screen { flex: 1; overflow-y: auto; padding: 12px 14px; display: none; }
         .screen.active { display: flex; flex-direction: column; }
         #scr-tap { align-items: center; justify-content: center; position: relative; }
         .tg-star {
-            width: 190px; height: 190px; cursor: pointer; transition: transform 0.07s;
+            width: 195px; height: 195px; cursor: pointer; transition: transform 0.07s;
             filter: drop-shadow(0 0 30px rgba(245, 158, 11, 0.55));
         }
         .tg-star:active { transform: scale(0.91); }
@@ -42,11 +47,17 @@
         }
         .item {
             background: #162032; border: 1px solid #283548; border-radius: 14px;
-            padding: 12px 14px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 10px;
         }
-        .btn { background: #3b82f6; color: #fff; border: none; padding: 9px 14px; border-radius: 10px; font-weight: 700; cursor: pointer; }
+        .item-left { display: flex; align-items: center; gap: 10px; }
+        .gift-icon { width: 42px; height: 42px; flex-shrink: 0; }
+        .btn { background: #3b82f6; color: #fff; border: none; padding: 9px 12px; border-radius: 10px; font-weight: 700; cursor: pointer; white-space: nowrap; }
         .btn-gold { background: linear-gradient(45deg, #f59e0b, #fbbf24); color: #000; }
-        .tag { background: #ef4444; font-size: 10px; padding: 2px 6px; border-radius: 6px; margin-left: 5px; }
+        .tag { background: #ef4444; color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 6px; margin-left: 5px; font-weight: 800; }
+        .r-com { color: #94a3b8; font-size: 11px; }
+        .r-rar { color: #38bdf8; font-size: 11px; }
+        .r-epi { color: #c084fc; font-size: 11px; }
+        .r-leg { color: #fbbf24; font-size: 11px; }
         .menu { display: flex; background: #0f172a; border-top: 1px solid #1e293b; padding: 8px 0; }
         .tab { flex: 1; text-align: center; font-size: 12px; color: #64748b; padding: 4px; cursor: pointer; }
         .tab.active { color: #fbbf24; font-weight: 700; }
@@ -55,8 +66,9 @@
 <body>
 
 <div class="top-panel">
+    <button class="reset-btn" onclick="confirmReset()">🗑️ Сброс</button>
     <div class="counter-box">
-        <svg width="28" height="28" viewBox="0 0 24 24"><path fill="#fbbf24" d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.3l-6.1 3.3 1.4-6.8-5.1-4.7 6.9-.8z"/></svg>
+        <svg width="26" height="26" viewBox="0 0 24 24"><path fill="#fbbf24" d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.3l-6.1 3.3 1.4-6.8-5.1-4.7 6.9-.8z"/></svg>
         <span class="bal-num" id="bal">0</span>
     </div>
     <div class="sub-stats">Клик: +<span id="pwr">1</span> | Доход: +<span id="inc">0</span>/сек</div>
@@ -74,27 +86,103 @@
 </div>
 
 <div id="scr-upg" class="screen">
-    <div class="item"><div><b>Мощный клик (+1)</b><br><small>Сила тапа</small></div><button class="btn" onclick="buyUpg(100,1)">100 ⭐</button></div>
-    <div class="item"><div><b>Магнит звёзд (+5)</b><br><small>Сила тапа</small></div><button class="btn" onclick="buyUpg(450,5)">450 ⭐</button></div>
-    <div class="item"><div><b>Турбо-режим (+25)</b><br><small>Сила тапа</small></div><button class="btn" onclick="buyUpg(2000,25)">2 000 ⭐</button></div>
+    <div class="item"><div><b>👆 Мощный клик (+1)</b><br><small>Сила тапа</small></div><button class="btn" onclick="buyUpg(100,1)">100 ⭐</button></div>
+    <div class="item"><div><b>🧲 Магнит звёзд (+5)</b><br><small>Сила тапа</small></div><button class="btn" onclick="buyUpg(450,5)">450 ⭐</button></div>
+    <div class="item"><div><b>⚡ Двойной импульс (+15)</b><br><small>Сила тапа</small></div><button class="btn" onclick="buyUpg(1200,15)">1 200 ⭐</button></div>
+    <div class="item"><div><b>🔥 Турбо-тап (+40)</b><br><small>Сила тапа</small></div><button class="btn" onclick="buyUpg(3500,40)">3 500 ⭐</button></div>
+    <div class="item"><div><b>🚀 Звёздный реактор (+120)</b><br><small>Сила тапа</small></div><button class="btn" onclick="buyUpg(10000,120)">10 000 ⭐</button></div>
+    <div class="item"><div><b>🌌 Квантовый клик (+500)</b><br><small>Сила тапа</small></div><button class="btn" onclick="buyUpg(45000,500)">45 000 ⭐</button></div>
 </div>
 
 <div id="scr-nft" class="screen">
-    <div class="item"><div><b>🧸 Мишка [Обычный]</b><br><small>+2 / сек</small></div><button class="btn" onclick="buyNft(500,2)">500 ⭐</button></div>
-    <div class="item"><div><b>🚀 Ракета [Редкий]</b><br><small>+15 / сек</small></div><button class="btn" onclick="buyNft(3000,15)">3 000 ⭐</button></div>
-    <div class="item"><div><b>💎 Алмаз NFT [Эпик]</b><br><small>+80 / сек</small></div><button class="btn" onclick="buyNft(15000,80)">15 000 ⭐</button></div>
-    <div class="item"><div><b>👑 Корона NFT [Легенда]</b><br><small>+500 / сек</small></div><button class="btn" onclick="buyNft(80000,500)">80 000 ⭐</button></div>
+    <div class="item">
+        <div class="item-left">
+            <svg class="gift-icon" viewBox="0 0 64 64"><circle cx="18" cy="18" r="9" fill="#92400e"/><circle cx="46" cy="18" r="9" fill="#92400e"/><circle cx="32" cy="34" r="20" fill="#b45309"/><circle cx="32" cy="39" r="9" fill="#fde68a"/><circle cx="25" cy="30" r="2.5" fill="#000"/><circle cx="39" cy="30" r="2.5" fill="#000"/><circle cx="32" cy="36" r="3" fill="#000"/></svg>
+            <div><b>Плюшевый мишка</b> <span class="r-com">[Обычный]</span><br><small>+2 StarCoins / сек</small></div>
+        </div>
+        <button class="btn" onclick="buyNft(500,2)">500 ⭐</button>
+    </div>
+    <div class="item">
+        <div class="item-left">
+            <svg class="gift-icon" viewBox="0 0 64 64"><path fill="#ef4444" d="M32 56S8 40 8 22a13 13 0 0 1 24-7 13 13 0 0 1 24 7c0 18-24 34-24 34z"/></svg>
+            <div><b>Красное сердце</b> <span class="r-com">[Обычный]</span><br><small>+6 StarCoins / сек</small></div>
+        </div>
+        <button class="btn" onclick="buyNft(1400,6)">1 400 ⭐</button>
+    </div>
+    <div class="item">
+        <div class="item-left">
+            <svg class="gift-icon" viewBox="0 0 64 64"><rect x="12" y="30" width="40" height="22" rx="4" fill="#f472b6"/><rect x="12" y="38" width="40" height="6" fill="#fbcfe8"/><rect x="30" y="14" width="4" height="16" fill="#fde047"/><circle cx="32" cy="11" r="4" fill="#f97316"/></svg>
+            <div><b>Праздничный торт</b> <span class="r-rar">[Редкий]</span><br><small>+18 StarCoins / сек</small></div>
+        </div>
+        <button class="btn" onclick="buyNft(3500,18)">3 500 ⭐</button>
+    </div>
+    <div class="item">
+        <div class="item-left">
+            <svg class="gift-icon" viewBox="0 0 64 64"><path fill="#38bdf8" d="M32 6c12 10 16 26 12 40H20C16 32 20 16 32 6z"/><circle cx="32" cy="28" r="6" fill="#0f172a"/><path fill="#f97316" d="M24 46l8 12 8-12z"/></svg>
+            <div><b>Космо-ракета</b> <span class="r-rar">[Редкий]</span><br><small>+45 StarCoins / сек</small></div>
+        </div>
+        <button class="btn" onclick="buyNft(8500,45)">8 500 ⭐</button>
+    </div>
+    <div class="item">
+        <div class="item-left">
+            <svg class="gift-icon" viewBox="0 0 64 64"><polygon points="20,10 44,10 56,26 32,56 8,26" fill="#a855f7"/><polygon points="20,10 44,10 32,26" fill="#e9d5ff"/><polygon points="8,26 56,26 32,56" fill="#7e22ce"/></svg>
+            <div><b>Кибер-алмаз NFT</b> <span class="r-epi">[Эпик]</span><br><small>+130 StarCoins / сек</small></div>
+        </div>
+        <button class="btn" onclick="buyNft(22000,130)">22 000 ⭐</button>
+    </div>
+    <div class="item">
+        <div class="item-left">
+            <svg class="gift-icon" viewBox="0 0 64 64"><circle cx="32" cy="36" r="16" fill="none" stroke="#fbbf24" stroke-width="6"/><polygon points="32,8 42,18 32,26 22,18" fill="#38bdf8"/></svg>
+            <div><b>Кольцо с бриллиантом NFT</b> <span class="r-epi">[Эпик]</span><br><small>+320 StarCoins / сек</small></div>
+        </div>
+        <button class="btn" onclick="buyNft(50000,320)">50 000 ⭐</button>
+    </div>
+    <div class="item" style="border-color:#fbbf24">
+        <div class="item-left">
+            <svg class="gift-icon" viewBox="0 0 64 64"><path fill="#fbbf24" d="M16 12h32v16c0 10-7 18-16 18s-16-8-16-18V12z"/><rect x="26" y="46" width="12" height="8" fill="#d97706"/><rect x="20" y="54" width="24" height="5" rx="2" fill="#fbbf24"/></svg>
+            <div><b>Золотой Кубок NFT</b> <span class="r-leg">[Легенда]</span><br><small>+900 StarCoins / сек</small></div>
+        </div>
+        <button class="btn btn-gold" onclick="buyNft(120000,900)">120 000 ⭐</button>
+    </div>
 </div>
 
 <div id="scr-don" class="screen">
-    <div class="item"><div><b>10 000 StarCoins</b><br><small>Стартовый набор</small></div><button class="btn btn-gold" onclick="donate('pack_10k')">10 ⭐️</button></div>
-    <div class="item" style="border-color:#fbbf24"><div><b>100 000 StarCoins <span class="tag">Выгодно!</span></b><br><small>Экономия 10%</small></div><button class="btn btn-gold" onclick="donate('pack_100k')">90 ⭐️</button></div>
+    <div class="item">
+        <div><b>1 000 000 StarCoins</b><br><small>Стартовый набор</small></div>
+        <button class="btn btn-gold" onclick="donate('pack_1m')">5 ⭐️</button>
+    </div>
+        <div class="item" style="border-color:#fbbf24">
+        <div class="item-left">
+            <svg class="gift-icon" viewBox="0 0 64 64"><path fill="#fbbf24" d="M16 12h32v16c0 10-7 18-16 18s-16-8-16-18V12z"/><rect x="26" y="46" width="12" height="8" fill="#d97706"/><rect x="20" y="54" width="24" height="5" rx="2" fill="#fbbf24"/></svg>
+            <div><b>Золотой Кубок NFT</b> <span class="r-leg">[Легенда]</span><br><small>+900 StarCoins / сек</small></div>
+        </div>
+        <button class="btn btn-gold" onclick="buyNft(120000,900)">120 000 ⭐</button>
+    </div>
+</div>
+
+<div id="scr-don" class="screen">
+    <div class="item">
+        <div><b>1 000 000 StarCoins</b><br><small>Стартовый набор</small></div>
+        <button class="btn btn-gold" onclick="donate('pack_1m')">5 ⭐️</button>
+    </div>
+    <div class="item" style="border-color:#38bdf8">
+        <div><b>5 000 000 StarCoins <span class="tag" style="background:#3b82f6">Выгода</span></b><br><small>В 2.5 раза больше монет</small></div>
+        <button class="btn btn-gold" onclick="donate('pack_5m')">10 ⭐️</button>
+    </div>
+    <div class="item">
+        <div><b>100 000 000 StarCoins</b><br><small>Набор магната</small></div>
+        <button class="btn btn-gold" onclick="donate('pack_100m')">25 ⭐️</button>
+    </div>
+    <div class="item" style="border-color:#fbbf24; box-shadow: 0 0 15px rgba(251, 191, 36, 0.25);">
+        <div><b>1 000 000 000 StarCoins <span class="tag">Мега акция!</span></b><br><small>Максимальный пакет миллиардера</small></div>
+        <button class="btn btn-gold" onclick="donate('pack_1b')">50 ⭐️</button>
+    </div>
 </div>
 
 <div class="menu">
     <div class="tab active" onclick="go('tap',this)">⭐ Тапать</div>
     <div class="tab" onclick="go('upg',this)">⚡ Бусты</div>
-    <div class="tab" onclick="go('nft',this)">🎁 NFT</div>
+    <div class="tab" onclick="go('nft',this)">🎁 Подарки</div>
     <div class="tab" onclick="go('don',this)">💎 Донат</div>
 </div>
 
@@ -103,7 +191,7 @@
     if (tg) tg.expand();
 
     let s = { b: 0, p: 1, i: 0 };
-    try { s = Object.assign(s, JSON.parse(localStorage.getItem('sc_v2'))); } catch(e) {}
+    try { s = Object.assign(s, JSON.parse(localStorage.getItem('sc_v4'))); } catch(e) {}
 
     const q = new URLSearchParams(location.search);
     const bonus = Number(q.get('bonus') || 0), tx = q.get('tx');
@@ -113,9 +201,9 @@
 
     function render() {
         document.getElementById('bal').textContent = Math.floor(s.b).toLocaleString();
-        document.getElementById('pwr').textContent = s.p;
-        document.getElementById('inc').textContent = s.i;
-        try { localStorage.setItem('sc_v2', JSON.stringify(s)); } catch(e) {}
+        document.getElementById('pwr').textContent = s.p.toLocaleString();
+        document.getElementById('inc').textContent = s.i.toLocaleString();
+        try { localStorage.setItem('sc_v4', JSON.stringify(s)); } catch(e) {}
     }
 
     document.getElementById('star').addEventListener('pointerdown', (e) => {
@@ -131,16 +219,29 @@
         setTimeout(() => el.remove(), 700);
     });
 
+    function confirmReset() {
+        const doReset = () => { s = { b: 0, p: 1, i: 0 }; render(); };
+        if (tg?.showConfirm) {
+            tg.showConfirm('Вы точно хотите сбросить весь прогресс, бусты и подарки?', (ok) => { if (ok) doReset(); });
+        } else if (confirm('Вы точно хотите сбросить весь прогресс?')) {
+            doReset();
+        }
+    }
+
     function buyUpg(c, p) {
-        if (s.b < c) return alert('Не хватает StarCoins!');
+        if (s.b < c) return tg?.showAlert ? tg.showAlert('Не хватает StarCoins!') : alert('Не хватает StarCoins!');
         s.b -= c; s.p += p; render();
     }
     function buyNft(c, i) {
-        if (s.b < c) return alert('Не хватает StarCoins!');
+        if (s.b < c) return tg?.showAlert ? tg.showAlert('Не хватает StarCoins!') : alert('Не хватает StarCoins!');
         s.b -= c; s.i += i; render();
     }
     function donate(pack) {
-        if (tg) tg.sendData(JSON.stringify({ action: 'donate', pack }));
+        if (!tg || !tg.initData) {
+            alert('Откройте игру через кнопку внизу чата бота (возле клавиатуры), чтобы оплатить звёздами!');
+            return;
+        }
+        tg.sendData(JSON.stringify({ action: 'donate', pack }));
     }
     function go(id, el) {
         document.querySelectorAll('.screen').forEach(x => x.classList.remove('active'));
