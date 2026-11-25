@@ -3,181 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>StarCoins Clicker</title>
+    <title>StarCoins</title>
     <script src="https://telegram.org"></script>
     <style>
-        :root { --bg: #0f172a; --card: #1e293b; --gold: #fbbf24; --text: #f8fafc; --accent: #3b82f6; }
         * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
         body {
-            margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg); color: var(--text); display: flex; flex-direction: column; height: 100vh; overflow: hidden;
+            margin: 0; font-family: system-ui, -apple-system, sans-serif;
+            background: radial-gradient(circle at top, #1e293b, #090d16);
+            color: #fff; display: flex; flex-direction: column; height: 100vh; overflow: hidden;
         }
-        .header { text-align: center; padding: 20px 10px 10px; background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); }
-        .balance { font-size: 36px; font-weight: 800; color: var(--gold); display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .stats { font-size: 13px; color: #94a3b8; margin-top: 4px; }
-        .content { flex: 1; overflow-y: auto; padding: 15px; display: none; }
-        .content.active { display: flex; flex-direction: column; }
-        #tab-tap { align-items: center; justify-content: center; }
-        .star-btn { font-size: 130px; cursor: pointer; transition: transform 0.08s; filter: drop-shadow(0 0 25px rgba(251, 191, 36, 0.5)); }
-        .star-btn:active { transform: scale(0.9); }
-        .card {
-            background: var(--card); border-radius: 14px; padding: 14px; margin-bottom: 12px;
-            display: flex; justify-content: space-between; align-items: center; border: 1px solid #334155;
+        .top-panel { padding: 18px; text-align: center; }
+        .counter-box {
+            display: inline-flex; align-items: center; gap: 10px;
+            background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(251, 191, 36, 0.35);
+            padding: 10px 24px; border-radius: 99px; box-shadow: 0 0 25px rgba(251, 191, 36, 0.2);
         }
-        .card-info h4 { margin: 0 0 4px; font-size: 16px; }
-        .card-info p { margin: 0; font-size: 12px; color: #94a3b8; }
-        .btn { background: var(--accent); color: white; border: none; padding: 10px 14px; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 13px; }
+        .bal-num {
+            font-size: 34px; font-weight: 900;
+            background: linear-gradient(180deg, #fff7ed, #fbbf24);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .sub-stats { font-size: 13px; color: #94a3b8; margin-top: 8px; }
+        .screen { flex: 1; overflow-y: auto; padding: 14px; display: none; }
+        .screen.active { display: flex; flex-direction: column; }
+        #scr-tap { align-items: center; justify-content: center; position: relative; }
+        .tg-star {
+            width: 190px; height: 190px; cursor: pointer; transition: transform 0.07s;
+            filter: drop-shadow(0 0 30px rgba(245, 158, 11, 0.55));
+        }
+        .tg-star:active { transform: scale(0.91); }
+        .float-num {
+            position: absolute; font-size: 26px; font-weight: 900; color: #fde047;
+            pointer-events: none; animation: rise 0.7s ease-out forwards;
+        }
+        @keyframes rise {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-90px) scale(1.2); }
+        }
+        .item {
+            background: #162032; border: 1px solid #283548; border-radius: 14px;
+            padding: 12px 14px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .btn { background: #3b82f6; color: #fff; border: none; padding: 9px 14px; border-radius: 10px; font-weight: 700; }
         .btn-gold { background: linear-gradient(45deg, #f59e0b, #fbbf24); color: #000; }
-        .badge { background: #ef4444; color: white; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 6px; text-transform: uppercase; margin-left: 6px; }
-        .rarity-common { color: #94a3b8; }
-        .rarity-rare { color: #38bdf8; }
-        .rarity-epic { color: #c084fc; }
-        .rarity-legendary { color: #fbbf24; }
-        .nav { display: flex; background: var(--card); border-top: 1px solid #334155; padding: 8px 0; }
-        .nav-item { flex: 1; text-align: center; color: #94a3b8; font-size: 12px; cursor: pointer; padding: 6px; }
-        .nav-item.active { color: var(--gold); font-weight: bold; }
-        .nav-icon { font-size: 20px; display: block; margin-bottom: 2px; }
+        .tag { background: #ef4444; font-size: 10px; padding: 2px 6px; border-radius: 6px; margin-left: 5px; }
+        .menu { display: flex; background: #0f172a; border-top: 1px solid #1e293b; padding: 8px 0; }
+        .tab { flex: 1; text-align: center; font-size: 12px; color: #64748b; padding: 4px; }
+        .tab.active { color: #fbbf24; font-weight: 700; }
     </style>
 </head>
 <body>
-
-<div class="header">
-    <div class="balance">⭐ <span id="balance">0</span></div>
-    <div class="stats">Клик: +<span id="tap-power">1</span> | Пассивно: +<span id="passive">0</span>/сек</div>
+<div class="top-panel">
+    <div class="counter-box">
+        <svg width="28" height="28" viewBox="0 0 24 24"><path fill="#fbbf24" d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.3l-6.1 3.3 1.4-6.8-5.1-4.7 6.9-.8z"/></svg>
+        <span class="bal-num" id="bal">0</span>
+    </div>
+    <div class="sub-stats">Клик: +<span id="pwr">1</span> | Доход: +<span id="inc">0</span>/сек</div>
 </div>
 
-<div id="tab-tap" class="content active">
-    <div class="star-btn" onclick="tapStar()">⭐</div>
-    <p style="color: #64748b; font-size: 13px; margin-top: 20px;">Тапай по звезде, чтобы копить StarCoins!</p>
+<div id="scr-tap" class="screen active">
+    <svg class="tg-star" id="star" viewBox="0 0 100 100">
+        <defs>
+            <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#fef08a"/><stop offset="50%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#b45309"/>
+            </linearGradient>
+        </defs>
+        <path fill="url(#g)" d="M50 6 L63 34 L94 38 L71 59 L77 90 L50 75 L23 90 L29 59 L6 38 L37 34 Z" stroke="#fde047" stroke-width="2" stroke-linejoin="round"/>
+    </svg>
 </div>
 
-<div id="tab-upgrades" class="content">
-    <h3>⚡ Улучшения клика</h3>
-    <div class="card">
-        <div class="card-info"><h4>Мощный палец (+1 за клик)</h4><p>Увеличивает силу каждого тапа</p></div>
-        <button class="btn" onclick="buyUpgrade(100, 1)">100 ⭐</button>
-    </div>
-    <div class="card">
-        <div class="card-info"><h4>Звёздный магнит (+5 за клик)</h4><p>Притягивает больше монет</p></div>
-        <button class="btn" onclick="buyUpgrade(450, 5)">450 ⭐</button>
-    </div>
-    <div class="card">
-        <div class="card-info"><h4>Турбо-тап (+25 за клик)</h4><p>Максимальная скорость фарма</p></div>
-        <button class="btn" onclick="buyUpgrade(2000, 25)">2 000 ⭐</button>
-    </div>
+<div id="scr-upg" class="screen">
+    <div class="item"><div><b>Мощный клик (+1)</b><br><small>Сила тапа</small></div><button class="btn" onclick="buyUpg(100,1)">100 ⭐</button></div>
+    <div class="item"><div><b>Магнит звёзд (+5)</b><br><small>Сила тапа</small></div><button class="btn" onclick="buyUpg(450,5)">450 ⭐</button></div>
+    <div class="item"><div><b>Турбо-режим (+25)</b><br><small>Сила тапа</small></div><button class="btn" onclick="buyUpg(2000,25)">2 000 ⭐</button></div>
 </div>
 
-<div id="tab-nft" class="content">
-    <h3>🎁 Виртуальные Подарки и NFT</h3>
-    <p style="font-size: 12px; color: #94a3b8; margin-top: -8px;">Приносят StarCoins каждую секунду в зависимости от редкости</p>
-    <div class="card">
-        <div class="card-info"><h4>🧸 Плюшевый мишка <span class="rarity-common">[Обычный]</span></h4><p>Доход: +2 StarCoins / сек</p></div>
-        <button class="btn" onclick="buyNft(500, 2)">500 ⭐</button>
-    </div>
-    <div class="card">
-        <div class="card-info"><h4>🚀 Космо-ракета <span class="rarity-rare">[Редкий]</span></h4><p>Доход: +15 StarCoins / сек</p></div>
-        <button class="btn" onclick="buyNft(3000, 15)">3 000 ⭐</button>
-    </div>
-    <div class="card">
-        <div class="card-info"><h4>💎 Кибер-алмаз NFT <span class="rarity-epic">[Эпический]</span></h4><p>Доход: +80 StarCoins / сек</p></div>
-        <button class="btn" onclick="buyNft(15000, 80)">15 000 ⭐</button>
-    </div>
-    <div class="card">
-        <div class="card-info"><h4>👑 Золотой Дуров NFT <span class="rarity-legendary">[Легендарный]</span></h4><p>Доход: +500 StarCoins / сек</p></div>
-        <button class="btn" onclick="buyNft(80000, 500)">80 000 ⭐</button>
-    </div>
+<div id="scr-nft" class="screen">
+    <div class="item"><div><b>🧸 Мишка [Обычный]</b><br><small>+2 / сек</small></div><button class="btn" onclick="buyNft(500,2)">500 ⭐</button></div>
+    <div class="item"><div><b>🚀 Ракета [Редкий]</b><br><small>+15 / сек</small></div><button class="btn" onclick="buyNft(3000,15)">3 000 ⭐</button></div>
+    <div class="item"><div><b>💎 Алмаз NFT [Эпик]</b><br><small>+80 / сек</small></div><button class="btn" onclick="buyNft(15000,80)">15 000 ⭐</button></div>
+    <div class="item"><div><b>👑 Корона NFT [Легенда]</b><br><small>+500 / сек</small></div><button class="btn" onclick="buyNft(80000,500)">80 000 ⭐</button></div>
 </div>
 
-<div id="tab-donate" class="content">
-    <h3>💫 Магазин StarCoins</h3>
-    <p style="font-size: 12px; color: #94a3b8; margin-top: -8px;">Пополнение за Звёзды Telegram</p>
-    <div class="card">
-        <div class="card-info"><h4>10 000 StarCoins</h4><p>Базовый набор для быстрого старта</p></div>
-        <button class="btn btn-gold" onclick="requestDonate('pack_10k')">10 ⭐️ Stars</button>
-    </div>
-    <div class="card" style="border-color: #fbbf24;">
-        <div class="card-info"><h4>100 000 StarCoins <span class="badge">Выгодно!</span></h4><p>Экономия 10% + хватит на Легендарный NFT</p></div>
-        <button class="btn btn-gold" onclick="requestDonate('pack_100k')">90 ⭐️ Stars</button>
-    </div>
+<div id="scr-don" class="screen">
+    <div class="item"><div><b>10 000 StarCoins</b><br><small>Стартовый набор</small></div><button class="btn btn-gold" onclick="donate('pack_10k')">10 ⭐️</button></div>
+    <div class="item" style="border-color:#fbbf24"><div><b>100 000 StarCoins <span class="tag">Выгодно!</span></b><br><small>Экономия 10%</small></div><button class="btn btn-gold" onclick="donate('pack_100k')">90 ⭐️</button></div>
 </div>
 
-<div class="nav">
-    <div class="nav-item active" onclick="switchTab('tap', this)"><span class="nav-icon">⭐</span>Тапать</div>
-    <div class="nav-item" onclick="switchTab('upgrades', this)"><span class="nav-icon">⚡</span>Улучшения</div>
-    <div class="nav-item" onclick="switchTab('nft', this)"><span class="nav-icon">🎁</span>NFT / Подарки</div>
-    <div class="nav-item" onclick="switchTab('donate', this)"><span class="nav-icon">💎</span>Донат</div>
+<div class="menu">
+    <div class="tab active" onclick="go('tap',this)">⭐ Тапать</div>
+    <div class="tab" onclick="go('upg',this)">⚡ Бусты</div>
+    <div class="tab" onclick="go('nft',this)">🎁 NFT</div>
+    <div class="tab" onclick="go('don',this)">💎 Донат</div>
 </div>
 
 <script>
-    const tg = window.Telegram.WebApp;
-    tg.expand();
+    const tg = window.Telegram?.WebApp;
+    if (tg) tg.expand();
 
-    // Загружаем сохранение из памяти устройства (CloudStorage или localStorage)
-    let state = JSON.parse(localStorage.getItem('starcoins_save')) || {
-        balance: 0,
-        tap_power: 1,
-        passive_income: 0
-    };
+    let s = { b: 0, p: 1, i: 0 };
+    try { s = Object.assign(s, JSON.parse(localStorage.getItem('sc_v2'))); } catch(e) {}
 
-    // Проверяем, начислил ли бот бонус после оплаты Stars через параметр ссылки
-    const urlParams = new URLSearchParams(window.location.search);
-    const bonus = parseInt(urlParams.get('bonus') || '0');
-    const txId = urlParams.get('tx');
-    if (bonus > 0 && txId && localStorage.getItem('last_tx') !== txId) {
-        state.balance += bonus;
-        localStorage.setItem('last_tx', txId);
-        tg.showAlert(`🎉 Начислено +${bonus.toLocaleString()} StarCoins!`);
+    const q = new URLSearchParams(location.search);
+    const bonus = Number(q.get('bonus') || 0), tx = q.get('tx');
+    if (bonus > 0 && tx && localStorage.getItem('tx') !== tx) {
+        s.b += bonus; localStorage.setItem('tx', tx);
     }
 
-    function saveState() {
-        localStorage.setItem('starcoins_save', JSON.stringify(state));
-        document.getElementById('balance').innerText = Math.floor(state.balance).toLocaleString();
-        document.getElementById('tap-power').innerText = state.tap_power;
-        document.getElementById('passive').innerText = state.passive_income;
+    function render() {
+        document.getElementById('bal').textContent = Math.floor(s.b).toLocaleString();
+        document.getElementById('pwr').textContent = s.p;
+        document.getElementById('inc').textContent = s.i;
+        try { localStorage.setItem('sc_v2', JSON.stringify(s)); } catch(e) {}
     }
 
-    function tapStar() {
-        state.balance += state.tap_power;
-        saveState();
-        if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-    }
+    document.getElementById('star').addEventListener('pointerdown', (e) => {
+        s.b += s.p;
+        render();
+        if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+        const el = document.createElement('div');
+        el.className = 'float-num';
+        el.textContent = '+' + s.p;
+        el.style.left = (e.clientX - 15) + 'px';
+        el.style.top = (e.clientY - 60) + 'px';
+        document.getElementById('scr-tap').appendChild(el);
+        setTimeout(() => el.remove(), 700);
+    });
 
-    function buyUpgrade(cost, power) {
-        if (state.balance < cost) return tg.showAlert('Недостаточно StarCoins!');
-        state.balance -= cost;
-        state.tap_power += power;
-        saveState();
+    function buyUpg(c, p) {
+        if (s.b < c) return alert('Не хватает StarCoins!');
+        s.b -= c; s.p += p; render();
     }
-
-    function buyNft(cost, income) {
-        if (state.balance < cost) return tg.showAlert('Недостаточно StarCoins!');
-        state.balance -= cost;
-        state.passive_income += income;
-        saveState();
-        tg.showAlert('Подарок/NFT куплен! Пассивный доход увеличен.');
+    function buyNft(c, i) {
+        if (s.b < c) return alert('Не хватает StarCoins!');
+        s.b -= c; s.i += i; render();
     }
-
-    function requestDonate(pack) {
-        // Отправляем команду боту для выставления счёта в Telegram Stars
-        tg.sendData(JSON.stringify({ action: 'donate', pack: pack }));
+    function donate(pack) {
+        if (tg) tg.sendData(JSON.stringify({ action: 'donate', pack }));
     }
-
-    function switchTab(tabName, el) {
-        document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        document.getElementById('tab-' + tabName).classList.add('active');
+    function go(id, el) {
+        document.querySelectorAll('.screen').forEach(x => x.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+        document.getElementById('scr-' + id).classList.add('active');
         el.classList.add('active');
     }
 
-    setInterval(() => {
-        if (state.passive_income > 0) {
-            state.balance += state.passive_income;
-            saveState();
-        }
-    }, 1000);
-
-    saveState();
+    setInterval(() => { if (s.i > 0) { s.b += s.i; render(); } }, 1000);
+    render();
 </script>
 </body>
 </html>
-
