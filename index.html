@@ -98,12 +98,12 @@ body::before{
 </div>
 
 <script>
-const BOT_USER = "Lemonardy_bot";
+const BOT_USER = "ВАШ_БОТ_USERNAME";
 const tg = window.Telegram?.WebApp;
 if (tg) tg.expand();
 
-let s = { b: 0, p: 1, i: 0, sec: 0 };
-try { s = Object.assign(s, JSON.parse(localStorage.getItem('sc_v8'))); } catch(e) {}
+let s = { b: 0, p: 1, i: 0, sec: 0, nick: '' };
+try { s = Object.assign(s, JSON.parse(localStorage.getItem('sc_v10'))); } catch(e) {}
 
 const q = new URLSearchParams(location.search);
 const bonus = Number(q.get('bonus') || 0), tx = q.get('tx');
@@ -122,20 +122,37 @@ function render() {
     document.getElementById('pwr').textContent = fmt(s.p);
     document.getElementById('inc').textContent = fmt(s.i);
     document.getElementById('hrs').textContent = (s.sec / 3600).toFixed(1);
-    try { localStorage.setItem('sc_v8', JSON.stringify(s)); } catch(e) {}
+    try { localStorage.setItem('sc_v10', JSON.stringify(s)); } catch(e) {}
+}
+
+function setNick() {
+    const val = prompt('Введите ваш @username или ник для таблицы лидеров:', s.nick || '');
+    if (val && val.trim()) {
+        s.nick = val.trim();
+        render();
+        drawTop();
+    }
 }
 
 function drawTop() {
-    const me = tg?.initDataUnsafe?.user?.first_name || 'Вы';
+    if (!s.nick) {
+        const auto = tg?.initDataUnsafe?.user?.username ? '@' + tg.initDataUnsafe.user.username : '';
+        s.nick = auto || prompt('Введите ваш @username для рейтинга:', '') || 'Игрок';
+        render();
+    }
     const list = [
-        { name: 'CryptoKing', b: 14500000000, h: 142.5 },
-        { name: 'StarWhale', b: 6200000000, h: 89.2 },
-        { name: 'DurovFan', b: 1850000000, h: 54.0 },
-        { name: 'MoonTapper', b: 420000000, h: 31.4 },
-        { name: me + ' (Вы)', b: s.b, h: +(s.sec / 3600).toFixed(1), me: true }
+        { name: '@crypto_king', b: 14500000000, h: 142.5 },
+        { name: '@star_whale', b: 6200000000, h: 89.2 },
+        { name: '@durov_fan', b: 1850000000, h: 54.0 },
+        { name: '@moon_tapper', b: 420000000, h: 31.4 },
+        { name: s.nick + ' (Вы)', b: s.b, h: +(s.sec / 3600).toFixed(1), me: true }
     ].sort((a, b) => b.b - a.b);
 
-    document.getElementById('lb-list').innerHTML = list.map((u, idx) => `
+    document.getElementById('lb-list').innerHTML = `
+        <div style="text-align:right;margin-bottom:8px">
+            <button class="btn" onclick="setNick()">✏️ Изменить ник (${s.nick})</button>
+        </div>
+    ` + list.map((u, idx) => `
         <div class="it" style="${u.me ? 'border-color:#fbbf24' : ''}">
             <div class="lf">
                 <div class="rk rk${idx + 1}">${idx + 1}</div>
@@ -157,7 +174,7 @@ document.getElementById('star').addEventListener('pointerdown', (e) => {
 });
 
 function rst() {
-    const ok = () => { s = { b: 0, p: 1, i: 0, sec: 0 }; render(); drawTop(); };
+    const ok = () => { s = { b: 0, p: 1, i: 0, sec: 0, nick: s.nick }; render(); drawTop(); };
     if (tg?.showConfirm) tg.showConfirm('Сбросить весь прогресс?', r => { if (r) ok(); });
     else if (confirm('Сбросить весь прогресс?')) ok();
 }
