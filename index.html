@@ -99,11 +99,17 @@ body::before{
 
 <script>
 const BOT_USER = "Lemonardy_bot";
+const DB_URL = "https://starcoins-d91b8-default-rtdb.firebaseio.com";
 const tg = window.Telegram?.WebApp;
 if (tg) tg.expand();
 
+const tgUser = tg?.initDataUnsafe?.user;
+const uid = tgUser?.id ? String(tgUser.id) : ('u_' + (localStorage.getItem('gid') || (() => {
+    const id = Math.floor(Math.random() * 1e9); localStorage.setItem('gid', id); return id;
+})()));
+
 let s = { b: 0, p: 1, i: 0, sec: 0, nick: '' };
-try { s = Object.assign(s, JSON.parse(localStorage.getItem('sc_v10'))); } catch(e) {}
+try { s = Object.assign(s, JSON.parse(localStorage.getItem('sc_v11'))); } catch(e) {}
 
 const q = new URLSearchParams(location.search);
 const bonus = Number(q.get('bonus') || 0), tx = q.get('tx');
@@ -122,45 +128,67 @@ function render() {
     document.getElementById('pwr').textContent = fmt(s.p);
     document.getElementById('inc').textContent = fmt(s.i);
     document.getElementById('hrs').textContent = (s.sec / 3600).toFixed(1);
-    try { localStorage.setItem('sc_v10', JSON.stringify(s)); } catch(e) {}
+    try { localStorage.setItem('sc_v11', JSON.stringify(s)); } catch(e) {}
+}
+
+function ensureNick(force) {
+    if (!s.nick || force) {
+        const auto = tgUser?.username ? '@' + tgUser.username : (tgUser?.first_name || '');
+        const val = prompt('Введите ваш @username для таблицы лидеров:', s.nick || auto);
+        if (val && val.trim()) s.nick = val.trim();
+        else if (!s.nick) s.nick = auto || 'Игрок #' + uid.slice(-4);
+        render();
+    }
+}
+
+async function syncCloud() {
+    if (!DB_URL.startsWith('http') || !s.nick) return;
+    try {
+        await fetch(`${DB_URL}/players/${uid}.json`, {
+            method: 'PUT',
+            body: JSON.stringify({
+                name: s.nick,
+                b: Math.floor(s.b),
+                h: +(s.sec / 3600).toFixed(1)
+            })
+        });
+    } catch(e) {}
 }
 
 function setNick() {
-    const val = prompt('Введите ваш @username или ник для таблицы лидеров:', s.nick || '');
-    if (val && val.trim()) {
-        s.nick = val.trim();
-        render();
-        drawTop();
-    }
+    ensureNick(true);
+    syncCloud().then(drawTop);
 }
 
-function drawTop() {
-    if (!s.nick) {
-        const auto = tg?.initDataUnsafe?.user?.username ? '@' + tg.initDataUnsafe.user.username : '';
-        s.nick = auto || prompt('Введите ваш @username для рейтинга:', '') || 'Игрок';
-        render();
-    }
-    const list = [
-        { name: '@crypto_king', b: 14500000000, h: 142.5 },
-        { name: '@star_whale', b: 6200000000, h: 89.2 },
-        { name: '@durov_fan', b: 1850000000, h: 54.0 },
-        { name: '@moon_tapper', b: 420000000, h: 31.4 },
-        { name: s.nick + ' (Вы)', b: s.b, h: +(s.sec / 3600).toFixed(1), me: true }
-    ].sort((a, b) => b.b - a.b);
+async function drawTop() {
+    ensureNick(false);
+    const box = document.getElementById('lb-list');
+    box.innerHTML = '<div style="text-align:center;color:#94a3b8;padding:20px">Загрузка игроков...</div>';
+    await syncCloud();
 
-    document.getElementById('lb-list').innerHTML = `
-        <div style="text-align:right;margin-bottom:8px">
-            <button class="btn" onclick="setNick()">✏️ Изменить ник (${s.nick})</button>
-        </div>
-    ` + list.map((u, idx) => `
-        <div class="it" style="${u.me ? 'border-color:#fbbf24' : ''}">
-            <div class="lf">
-                <div class="rk rk${idx + 1}">${idx + 1}</div>
-                <div><b>${u.name}</b><br><small>⏱ В игре: ${u.h} ч</small></div>
+    try {
+        const res = await fetch(`${DB_URL}/players.json`);
+        const data = await res.json() || {};
+        const list = Object.entries(data)
+            .map(([id, u]) => ({ id, ...u }))
+            .sort((a, b) => (b.b || 0) - (a.b || 0));
+
+        box.innerHTML = `
+            <div style="text-align:right;margin-bottom:8px">
+                <button class="btn" onclick="setNick()">✏️ Ник: ${s.nick}</button>
             </div>
-            <b>${fmt(u.b)} ⭐</b>
-        </div>
-    `).join('');
+        ` + (list.length ? list.map((u, idx) => `
+            <div class="it" style="${u.id === uid ? 'border-color:#fbbf24' : ''}">
+                <div class="lf">
+                    <div class="rk rk${idx + 1}">${idx + 1}</div>
+                    <div><b>${u.name}${u.id === uid ? ' (Вы)' : ''}</b><br><small>⏱ В игре: ${u.h || 0} ч</small></div>
+                </div>
+                <b>${fmt(u.b || 0)} ⭐</b>
+            </div>
+        `).join('') : '<div style="text-align:center;color:#94a3b8">Пока никого нет</div>');
+    } catch(e) {
+        box.innerHTML = '<div style="text-align:center;color:#fca5a5">Проверьте ссылку DB_URL в коде</div>';
+    }
 }
 
 document.getElementById('star').addEventListener('pointerdown', (e) => {
@@ -174,17 +202,17 @@ document.getElementById('star').addEventListener('pointerdown', (e) => {
 });
 
 function rst() {
-    const ok = () => { s = { b: 0, p: 1, i: 0, sec: 0, nick: s.nick }; render(); drawTop(); };
+    const ok = () => { s = { b: 0, p: 1, i: 0, sec: 0, nick: s.nick }; render(); syncCloud().then(drawTop); };
     if (tg?.showConfirm) tg.showConfirm('Сбросить весь прогресс?', r => { if (r) ok(); });
     else if (confirm('Сбросить весь прогресс?')) ok();
 }
 function upg(c, p) {
     if (s.b < c) return tg?.showAlert ? tg.showAlert('Не хватает StarCoins!') : alert('Не хватает StarCoins!');
-    s.b -= c; s.p += p; render();
+    s.b -= c; s.p += p; render(); syncCloud();
 }
 function nft(c, i) {
     if (s.b < c) return tg?.showAlert ? tg.showAlert('Не хватает StarCoins!') : alert('Не хватает StarCoins!');
-    s.b -= c; s.i += i; render();
+    s.b -= c; s.i += i; render(); syncCloud();
 }
 function don(pack) {
     const url = `https://t.me{BOT_USER}?start=${pack}`;
@@ -199,7 +227,9 @@ function go(id, el) {
 }
 
 setInterval(() => { s.sec += 1; if (s.i > 0) s.b += s.i; render(); }, 1000);
+setInterval(syncCloud, 15000);
 render();
+if (s.nick) syncCloud();
 </script>
 </body>
 </html>
