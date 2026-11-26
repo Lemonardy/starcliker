@@ -2,57 +2,52 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>StarCoins</title>
 <script src="https://telegram.org"></script>
 <style>
-*{box-sizing:border-box;user-select:none;-webkit-tap-highlight-color:transparent}
-body{
-    margin:0;font-family:system-ui,-apple-system,sans-serif;color:#fff;
-    display:flex;flex-direction:column;height:100vh;overflow:hidden;
-    background:radial-gradient(ellipse at 50% 0%,#2e1065 0%,#0f172a 45%,#030712 100%);
+*{box-sizing:border-box;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+input{-webkit-user-select:text;user-select:text}
+html,body{
+    margin:0;padding:0;width:100%;height:100dvh;overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,sans-serif;color:#fff;
+    display:flex;flex-direction:column;
+    background:radial-gradient(ellipse at 50% 0%,#2e1065 0%,#0f172a 48%,#030712 100%);
 }
-body::before{
-    content:"";position:fixed;inset:0;pointer-events:none;opacity:.45;
-    background-image:radial-gradient(#fff 1px,transparent 1px),radial-gradient(#fde047 1px,transparent 1px);
-    background-size:42px 42px,67px 67px;background-position:0 0,19px 27px;
-}
-.top{padding:14px 16px 8px;text-align:center;position:relative;z-index:2}
-.rst{position:absolute;right:14px;top:16px;background:rgba(239,68,68,.18);border:1px solid rgba(239,68,68,.45);color:#fca5a5;border-radius:10px;padding:6px 10px;font-size:12px;cursor:pointer}
-.box{display:inline-flex;align-items:center;gap:10px;background:rgba(15,23,42,.7);backdrop-filter:blur(8px);border:1px solid rgba(251,191,36,.45);padding:8px 22px;border-radius:99px;box-shadow:0 0 30px rgba(251,191,36,.28)}
-.bal{font-size:26px;font-weight:900;background:linear-gradient(180deg,#fffbeb,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.top{padding:calc(12px + env(safe-area-inset-top)) 14px 8px;text-align:center;position:relative;flex-shrink:0}
+.rst{position:absolute;right:12px;top:calc(14px + env(safe-area-inset-top));background:rgba(239,68,68,.2);border:1px solid rgba(239,68,68,.5);color:#fca5a5;border-radius:10px;padding:6px 9px;font-size:12px}
+.box{display:inline-flex;align-items:center;gap:8px;background:rgba(15,23,42,.75);border:1px solid rgba(251,191,36,.45);padding:7px 20px;border-radius:99px;box-shadow:0 0 24px rgba(251,191,36,.25)}
+.bal{font-size:25px;font-weight:900;color:#fbbf24}
 .sub{font-size:12px;color:#cbd5e1;margin-top:6px}
-.scr{flex:1;overflow-y:auto;padding:12px 14px;display:none;position:relative;z-index:2}
+.scr{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px 12px 24px;display:none}
 .scr.act{display:flex;flex-direction:column}
-#s-tap{align-items:center;justify-content:center}
-.glow{position:absolute;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(251,191,36,.28) 0%,transparent 70%);pointer-events:none}
-.star{width:195px;height:195px;cursor:pointer;transition:transform .07s;filter:drop-shadow(0 0 32px rgba(245,158,11,.65));z-index:2}
+#s-tap{align-items:center;justify-content:center;position:relative;overflow:hidden}
+.glow{position:absolute;width:230px;height:230px;border-radius:50%;background:radial-gradient(circle,rgba(251,191,36,.28) 0%,transparent 70%);pointer-events:none}
+.star{width:185px;height:185px;transition:transform .06s;filter:drop-shadow(0 0 28px rgba(245,158,11,.65));touch-action:manipulation}
 .star:active{transform:scale(.9)}
-.flt{position:absolute;font-size:24px;font-weight:900;color:#fde047;pointer-events:none;animation:up .7s ease-out forwards;z-index:5;text-shadow:0 2px 8px rgba(0,0,0,.8)}
-@keyframes up{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-95px) scale(1.2)}}
-.it{background:rgba(30,41,59,.78);backdrop-filter:blur(6px);border:1px solid rgba(148,163,184,.2);border-radius:14px;padding:10px 12px;margin-bottom:9px;display:flex;justify-content:space-between;align-items:center;gap:10px}
-.lf{display:flex;align-items:center;gap:10px}
-.ic{width:38px;height:38px;flex-shrink:0}
-.btn{background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;border:none;padding:9px 11px;border-radius:10px;font-weight:700;font-size:12px;cursor:pointer;white-space:nowrap}
+.flt{position:absolute;font-size:24px;font-weight:900;color:#fde047;pointer-events:none;animation:up .65s ease-out forwards}
+@keyframes up{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-85px) scale(1.2)}}
+.it{background:rgba(30,41,59,.85);border:1px solid rgba(148,163,184,.22);border-radius:14px;padding:10px 12px;margin-bottom:9px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-shrink:0}
+.lf{display:flex;align-items:center;gap:10px;min-width:0}
+.ic{width:36px;height:36px;flex-shrink:0}
+.btn{background:#2563eb;color:#fff;border:none;padding:9px 12px;border-radius:10px;font-weight:700;font-size:12px;white-space:nowrap;flex-shrink:0}
 .gld{background:linear-gradient(45deg,#f59e0b,#fbbf24);color:#000}
-.tag{background:#ef4444;color:#fff;font-size:10px;padding:2px 6px;border-radius:6px;margin-left:5px;font-weight:800}
-.rk{width:28px;height:28px;border-radius:8px;background:#334155;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px}
-.rk1{background:linear-gradient(135deg,#fbbf24,#d97706);color:#000}
-.rk2{background:linear-gradient(135deg,#e2e8f0,#94a3b8);color:#000}
-.rk3{background:linear-gradient(135deg,#f97316,#9a3412);color:#fff}
-.nav{display:flex;background:rgba(15,23,42,.95);border-top:1px solid rgba(148,163,184,.18);padding:8px 0;z-index:3}
-.tab{flex:1;text-align:center;font-size:11px;color:#94a3b8;padding:4px 2px;cursor:pointer}
+.tag{background:#ef4444;color:#fff;font-size:10px;padding:2px 5px;border-radius:6px;margin-left:4px;font-weight:800}
+.nick-bar{display:flex;gap:8px;margin-bottom:10px;flex-shrink:0}
+.nick-in{flex:1;background:#0f172a;border:1px solid #334155;color:#fff;padding:9px 12px;border-radius:10px;font-size:14px}
+.rk{width:26px;height:26px;border-radius:8px;background:#334155;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0}
+.rk1{background:#fbbf24;color:#000}.rk2{background:#cbd5e1;color:#000}.rk3{background:#ea580c;color:#fff}
+.nav{display:flex;background:#0b1120;border-top:1px solid rgba(148,163,184,.2);padding:8px 0 calc(8px + env(safe-area-inset-bottom));flex-shrink:0}
+.tab{flex:1;text-align:center;font-size:11px;color:#94a3b8;padding:4px 2px}
 .tab.act{color:#fbbf24;font-weight:700}
 </style>
 </head>
 <body>
+
 <div class="top">
     <button class="rst" onclick="rst()">🗑️ Сброс</button>
-    <div class="box">
-        <svg width="24" height="24" viewBox="0 0 24 24"><path fill="#fbbf24" d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.3l-6.1 3.3 1.4-6.8-5.1-4.7 6.9-.8z"/></svg>
-        <span class="bal" id="bal">0</span>
-    </div>
-    <div class="sub">Клик: +<span id="pwr">1</span> | Доход: +<span id="inc">0</span>/сек | ⏱ <span id="hrs">0.0</span> ч</div>
+    <div class="box"><span style="font-size:22px">⭐</span><span class="bal" id="bal">0</span></div>
+    <div class="sub">Клик: +<span id="pwr">1</span> | Доход: +<span id="inc">0</span>/с | ⏱ <span id="hrs">0.0</span> ч</div>
 </div>
 
 <div id="s-tap" class="scr act">
@@ -63,34 +58,52 @@ body::before{
     </svg>
 </div>
 
-<div id="s-upg" class="scr">
-    <div class="it"><div><b>👆 Мощный клик (+1)</b><br><small>Базовый буст</small></div><button class="btn" onclick="upg(100,1)">100 ⭐</button></div>
-    <div class="it"><div><b>🧲 Магнит звёзд (+10)</b><br><small>Усиление тапа</small></div><button class="btn" onclick="upg(1000,10)">1 000 ⭐</button></div>
-    <div class="it"><div><b>🔥 Турбо-тап (+250)</b><br><small>Скоростной фарм</small></div><button class="btn" onclick="upg(25000,250)">25 000 ⭐</button></div>
-    <div class="it"><div><b>🚀 Звёздный реактор (+15 000)</b><br><small>Мастер-уровень</small></div><button class="btn" onclick="upg(1500000,15000)">1.5 М ⭐</button></div>
-    <div class="it"><div><b>🌌 Галактический луч (+600 000)</b><br><small>Уровень магната</small></div><button class="btn" onclick="upg(75000000,600000)">75 М ⭐</button></div>
-    <div class="it"><div><b>🌠 Сверхновая (+8 000 000)</b><br><small>Элитный буст</small></div><button class="btn" onclick="upg(800000000,8000000)">800 М ⭐</button></div>
-    <div class="it" style="border-color:#fbbf24"><div><b>👑 Властелин Вселенной (+60 000 000)</b><br><small>Максимальный буст</small></div><button class="btn gld" onclick="upg(5000000000,60000000)">5 МЛРД ⭐</button></div>
+<div id="s-upg" class="scr"></div>
+<div id="s-nft" class="scr"></div>
+<div id="s-top" class="scr">
+    <div class="nick-bar">
+        <input id="nick-in" class="nick-in" placeholder="Ваш @username...">
+        <button class="btn gld" onclick="saveNick()">Сохранить</button>
+    </div>
+    <div id="lb-list"></div>
 </div>
-<div id="s-nft" class="scr">
-    <div class="it"><div class="lf"><svg class="ic" viewBox="0 0 64 64"><circle cx="18" cy="18" r="9" fill="#92400e"/><circle cx="46" cy="18" r="9" fill="#92400e"/><circle cx="32" cy="34" r="20" fill="#b45309"/><circle cx="32" cy="39" r="9" fill="#fde68a"/></svg><div><b>Плюшевый мишка</b><br><small>+5 / сек</small></div></div><button class="btn" onclick="nft(500,5)">500 ⭐</button></div>
-    <div class="it"><div class="lf"><svg class="ic" viewBox="0 0 64 64"><path fill="#38bdf8" d="M32 6c12 10 16 26 12 40H20C16 32 20 16 32 6z"/><path fill="#f97316" d="M24 46l8 12 8-12z"/></svg><div><b>Космо-ракета</b><br><small>+600 / сек</small></div></div><button class="btn" onclick="nft(50000,600)">50 000 ⭐</button></div>
-    <div class="it"><div class="lf"><svg class="ic" viewBox="0 0 64 64"><polygon points="20,10 44,10 56,26 32,56 8,26" fill="#a855f7"/><polygon points="20,10 44,10 32,26" fill="#e9d5ff"/></svg><div><b>Кибер-алмаз NFT</b><br><small>+45 000 / сек</small></div></div><button class="btn" onclick="nft(4000000,45000)">4 М ⭐</button></div>
-    <div class="it"><div class="lf"><svg class="ic" viewBox="0 0 64 64"><path fill="#fbbf24" d="M16 12h32v16c0 10-7 18-16 18s-16-8-16-18V12z"/><rect x="26" y="46" width="12" height="8" fill="#d97706"/></svg><div><b>Золотой Кубок NFT</b><br><small>+1 200 000 / сек</small></div></div><button class="btn gld" onclick="nft(120000000,1200000)">120 М ⭐</button></div>
-    <div class="it" style="border-color:#fbbf24"><div class="lf"><svg class="ic" viewBox="0 0 64 64"><polygon points="32,6 42,24 60,26 46,40 50,58 32,48 14,58 18,40 4,26 22,24" fill="#fde047"/></svg><div><b>Трон Галактики NFT</b><br><small>+55 000 000 / сек</small></div></div><button class="btn gld" onclick="nft(5000000000,55000000)">5 МЛРД ⭐</button></div>
-</div>
-
-<div id="s-don" class="scr">
-    <div class="it"><div><b>1 000 000 StarCoins</b><br><small>Стартовый набор</small></div><button class="btn gld" onclick="don('pack_1m')">5 ⭐️</button></div>
-    <div class="it" style="border-color:#38bdf8"><div><b>5 000 000 StarCoins <span class="tag" style="background:#3b82f6">Выгода</span></b><br><small>В 2.5 раза больше монет</small></div><button class="btn gld" onclick="don('pack_5m')">10 ⭐️</button></div>
-    <div class="it"><div><b>100 000 000 StarCoins</b><br><small>Набор магната</small></div><button class="btn gld" onclick="don('pack_100m')">25 ⭐️</button></div>
-    <div class="it" style="border-color:#fbbf24"><div><b>1 000 000 000 StarCoins <span class="tag">Мега акция!</span></b><br><small>Пакет миллиардера</small></div><button class="btn gld" onclick="don('pack_1b')">50 ⭐️</button></div>
-</div>
-
-<div id="s-top" class="scr"><div id="lb-list"></div></div>
+<div id="s-don" class="scr"></div>
 
 <div class="nav">
-    <div class="tab act" onclick="go('tap',this)">⭐ Тапать</div>
+    <div class="tab act" onclick="go('tap',this)">⭐ Тап</div>
+    <div class="tab" onclick="go('upg',this)">⚡ Бусты</div>
+    <div class="tab" onclick="go('nft',this)">🎁 Подарки</div>
+    <div class="tab" onclick="go('top',this)">🏆 Топ</div>
+    <div class="tab" onclick="go('don',this)">💎 Донат</div>
+</div>
+
+    <div class="top">
+    <button class="rst" onclick="rst()">🗑️ Сброс</button>
+    <div class="box"><span style="font-size:22px">⭐</span><span class="bal" id="bal">0</span></div>
+    <div class="sub">Клик: +<span id="pwr">1</span> | Доход: +<span id="inc">0</span>/с | ⏱ <span id="hrs">0.0</span> ч</div>
+</div>
+
+<div id="s-tap" class="scr act">
+    <div class="glow"></div>
+    <svg class="star" id="star" viewBox="0 0 100 100">
+        <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fef08a"/><stop offset="50%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#b45309"/></linearGradient></defs>
+        <path fill="url(#g)" d="M50 6 L63 34 L94 38 L71 59 L77 90 L50 75 L23 90 L29 59 L6 38 L37 34 Z" stroke="#fde047" stroke-width="2" stroke-linejoin="round"/>
+    </svg>
+</div>
+
+<div id="s-upg" class="scr"></div>
+<div id="s-nft" class="scr"></div>
+<div id="s-top" class="scr">
+    <div class="nick-bar">
+        <input id="nick-in" class="nick-in" placeholder="Ваш @username...">
+        <button class="btn gld" onclick="saveNick()">Сохранить</button>
+    </div>
+    <div id="lb-list"></div>
+</div>
+<div id="s-don" class="scr"></div>
+
+<div class="nav">
+    <div class="tab act" onclick="go('tap',this)">⭐ Тап</div>
     <div class="tab" onclick="go('upg',this)">⚡ Бусты</div>
     <div class="tab" onclick="go('nft',this)">🎁 Подарки</div>
     <div class="tab" onclick="go('top',this)">🏆 Топ</div>
@@ -101,21 +114,36 @@ body::before{
 const BOT_USER = "Lemonardy_bot";
 const DB_URL = "https://starcoins-d91b8-default-rtdb.firebaseio.com";
 const tg = window.Telegram?.WebApp;
-if (tg) tg.expand();
+if (tg) { tg.ready(); tg.expand(); }
 
-const tgUser = tg?.initDataUnsafe?.user;
-const uid = tgUser?.id ? String(tgUser.id) : ('u_' + (localStorage.getItem('gid') || (() => {
+const uid = tg?.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : ('u_' + (localStorage.getItem('gid') || (() => {
     const id = Math.floor(Math.random() * 1e9); localStorage.setItem('gid', id); return id;
 })()));
 
 let s = { b: 0, p: 1, i: 0, sec: 0, nick: '' };
-try { s = Object.assign(s, JSON.parse(localStorage.getItem('sc_v11'))); } catch(e) {}
+try { s = Object.assign(s, JSON.parse(localStorage.getItem('sc_ios'))); } catch(e) {}
+if (!s.nick && tg?.initDataUnsafe?.user?.username) s.nick = '@' + tg.initDataUnsafe.user.username;
 
 const q = new URLSearchParams(location.search);
 const bonus = Number(q.get('bonus') || 0), tx = q.get('tx');
-if (bonus > 0 && tx && localStorage.getItem('tx') !== tx) {
-    s.b += bonus; localStorage.setItem('tx', tx);
-}
+if (bonus > 0 && tx && localStorage.getItem('tx') !== tx) { s.b += bonus; localStorage.setItem('tx', tx); }
+
+const UPGS = [
+    ['👆 Мощный клик', 1, 100], ['🧲 Магнит звёзд', 10, 1000], ['🔥 Турбо-тап', 250, 25000],
+    ['🚀 Звёздный реактор', 15000, 1500000], ['🌌 Галактический луч', 600000, 75000000],
+    ['🌠 Сверхновая', 8000000, 800000000], ['👑 Властелин Вселенной', 60000000, 5000000000]
+];
+const NFTS = [
+    ['🧸 Плюшевый мишка', 5, 500], ['❤️ Красное сердце', 35, 3500], ['🎂 Праздничный торт', 200, 20000],
+    ['🚀 Космо-ракета', 1500, 150000], ['💎 Кибер-алмаз NFT', 45000, 4000000],
+    ['🏆 Золотой Кубок NFT', 1200000, 120000000], ['👑 Трон Галактики NFT', 55000000, 5000000000]
+];
+const DONS = [
+    ['1 000 000 StarCoins', 'pack_1m', '5 ⭐️', ''],
+    ['5 000 000 StarCoins', 'pack_5m', '10 ⭐️', 'Выгода'],
+    ['100 000 000 StarCoins', 'pack_100m', '25 ⭐️', ''],
+    ['1 000 000 000 StarCoins', 'pack_1b', '50 ⭐️', 'Мега акция!']
+];
 
 function fmt(n) {
     if (n >= 1e9) return (n / 1e9).toFixed(2) + ' МЛРД';
@@ -123,101 +151,88 @@ function fmt(n) {
     return Math.floor(n).toLocaleString();
 }
 
+document.getElementById('s-upg').innerHTML = UPGS.map(u => `
+    <div class="it"><div><b>${u[0]}</b><br><small>+${fmt(u[1])} за клик</small></div><button class="btn" onclick="buy(${u[2]},${u[1]},0)">${fmt(u[2])} ⭐</button></div>
+`).join('');
+
+document.getElementById('s-nft').innerHTML = NFTS.map(n => `
+    <div class="it"><div><b>${n[0]}</b><br><small>+${fmt(n[1])} / сек</small></div><button class="btn gld" onclick="buy(${n[2]},0,${n[1]})">${fmt(n[2])} ⭐</button></div>
+`).join('');
+
+document.getElementById('s-don').innerHTML = DONS.map(d => `
+    <div class="it" style="${d[3] ? 'border-color:#fbbf24' : ''}"><div><b>${d[0]}${d[3] ? `<span class="tag">${d[3]}</span>` : ''}</b></div><button class="btn gld" onclick="don('${d[1]}')">${d[2]}</button></div>
+`).join('');
+
 function render() {
     document.getElementById('bal').textContent = fmt(s.b);
     document.getElementById('pwr').textContent = fmt(s.p);
     document.getElementById('inc').textContent = fmt(s.i);
     document.getElementById('hrs').textContent = (s.sec / 3600).toFixed(1);
-    try { localStorage.setItem('sc_v11', JSON.stringify(s)); } catch(e) {}
+    try { localStorage.setItem('sc_ios', JSON.stringify(s)); } catch(e) {}
 }
 
-function ensureNick(force) {
-    if (!s.nick || force) {
-        const auto = tgUser?.username ? '@' + tgUser.username : (tgUser?.first_name || '');
-        const val = prompt('Введите ваш @username для таблицы лидеров:', s.nick || auto);
-        if (val && val.trim()) s.nick = val.trim();
-        else if (!s.nick) s.nick = auto || 'Игрок #' + uid.slice(-4);
-        render();
-    }
-}
-
-async function syncCloud() {
+async function sync() {
     if (!DB_URL.startsWith('http') || !s.nick) return;
     try {
         await fetch(`${DB_URL}/players/${uid}.json`, {
             method: 'PUT',
-            body: JSON.stringify({
-                name: s.nick,
-                b: Math.floor(s.b),
-                h: +(s.sec / 3600).toFixed(1)
-            })
+            body: JSON.stringify({ name: s.nick, b: Math.floor(s.b), h: +(s.sec / 3600).toFixed(1) })
         });
     } catch(e) {}
 }
 
-function setNick() {
-    ensureNick(true);
-    syncCloud().then(drawTop);
+function saveNick() {
+    const v = document.getElementById('nick-in').value.trim();
+    if (!v) return;
+    s.nick = v.startsWith('@') ? v : '@' + v;
+    render(); sync().then(drawTop);
 }
 
 async function drawTop() {
-    ensureNick(false);
+    document.getElementById('nick-in').value = s.nick;
     const box = document.getElementById('lb-list');
-    box.innerHTML = '<div style="text-align:center;color:#94a3b8;padding:20px">Загрузка игроков...</div>';
-    await syncCloud();
-
+    if (!DB_URL.startsWith('http')) {
+        box.innerHTML = '<div style="text-align:center;color:#94a3b8;padding:15px">Вставьте ссылку Firebase в DB_URL</div>';
+        return;
+    }
+    box.innerHTML = '<div style="text-align:center;color:#94a3b8;padding:15px">Загрузка...</div>';
+    await sync();
     try {
         const res = await fetch(`${DB_URL}/players.json`);
         const data = await res.json() || {};
-        const list = Object.entries(data)
-            .map(([id, u]) => ({ id, ...u }))
-            .sort((a, b) => (b.b || 0) - (a.b || 0));
-
-        box.innerHTML = `
-            <div style="text-align:right;margin-bottom:8px">
-                <button class="btn" onclick="setNick()">✏️ Ник: ${s.nick}</button>
-            </div>
-        ` + (list.length ? list.map((u, idx) => `
+        const list = Object.entries(data).map(([id, u]) => ({ id, ...u })).sort((a, b) => (b.b || 0) - (a.b || 0));
+        box.innerHTML = list.length ? list.map((u, idx) => `
             <div class="it" style="${u.id === uid ? 'border-color:#fbbf24' : ''}">
-                <div class="lf">
-                    <div class="rk rk${idx + 1}">${idx + 1}</div>
-                    <div><b>${u.name}${u.id === uid ? ' (Вы)' : ''}</b><br><small>⏱ В игре: ${u.h || 0} ч</small></div>
-                </div>
+                <div class="lf"><div class="rk rk${idx + 1}">${idx + 1}</div><div><b>${u.name}</b><br><small>⏱ ${u.h || 0} ч</small></div></div>
                 <b>${fmt(u.b || 0)} ⭐</b>
             </div>
-        `).join('') : '<div style="text-align:center;color:#94a3b8">Пока никого нет</div>');
-    } catch(e) {
-        box.innerHTML = '<div style="text-align:center;color:#fca5a5">Проверьте ссылку DB_URL в коде</div>';
-    }
+        `).join('') : '<div style="text-align:center;color:#94a3b8">Введите ник выше и нажмите Сохранить</div>';
+    } catch(e) { box.innerHTML = '<div style="text-align:center;color:#fca5a5">Ошибка сети</div>'; }
 }
 
 document.getElementById('star').addEventListener('pointerdown', (e) => {
-    s.b += s.p; render();
+    e.preventDefault(); s.b += s.p; render();
     if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
     const el = document.createElement('div');
     el.className = 'flt'; el.textContent = '+' + fmt(s.p);
     el.style.left = (e.clientX - 15) + 'px'; el.style.top = (e.clientY - 60) + 'px';
     document.getElementById('s-tap').appendChild(el);
-    setTimeout(() => el.remove(), 700);
+    setTimeout(() => el.remove(), 650);
 });
 
+function buy(c, p, i) {
+    if (s.b < c) return tg?.showAlert ? tg.showAlert('Не хватает StarCoins!') : alert('Не хватает StarCoins!');
+    s.b -= c; s.p += p; s.i += i; render(); sync();
+}
 function rst() {
-    const ok = () => { s = { b: 0, p: 1, i: 0, sec: 0, nick: s.nick }; render(); syncCloud().then(drawTop); };
-    if (tg?.showConfirm) tg.showConfirm('Сбросить весь прогресс?', r => { if (r) ok(); });
-    else if (confirm('Сбросить весь прогресс?')) ok();
-}
-function upg(c, p) {
-    if (s.b < c) return tg?.showAlert ? tg.showAlert('Не хватает StarCoins!') : alert('Не хватает StarCoins!');
-    s.b -= c; s.p += p; render(); syncCloud();
-}
-function nft(c, i) {
-    if (s.b < c) return tg?.showAlert ? tg.showAlert('Не хватает StarCoins!') : alert('Не хватает StarCoins!');
-    s.b -= c; s.i += i; render(); syncCloud();
+    const ok = () => { s = { b: 0, p: 1, i: 0, sec: 0, nick: s.nick }; render(); sync().then(drawTop); };
+    if (tg?.showConfirm) tg.showConfirm('Сбросить прогресс?', r => { if (r) ok(); });
+    else if (confirm('Сбросить прогресс?')) ok();
 }
 function don(pack) {
     const url = `https://t.me{BOT_USER}?start=${pack}`;
-    if (tg?.openTelegramLink) tg.openTelegramLink(url);
-    else window.open(url, '_blank');
+    if (tg?.openTelegramLink) { tg.openTelegramLink(url); setTimeout(() => tg.close(), 150); }
+    else location.href = url;
 }
 function go(id, el) {
     document.querySelectorAll('.scr').forEach(x => x.classList.remove('act'));
@@ -227,10 +242,10 @@ function go(id, el) {
 }
 
 setInterval(() => { s.sec += 1; if (s.i > 0) s.b += s.i; render(); }, 1000);
-setInterval(syncCloud, 15000);
+setInterval(sync, 15000);
 render();
-if (s.nick) syncCloud();
 </script>
 </body>
 </html>
+
 
