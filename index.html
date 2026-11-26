@@ -72,3 +72,118 @@ body::before{
     <div class="it"><div><b>🌠 Сверхновая (+8 000 000)</b><br><small>Элитный буст</small></div><button class="btn" onclick="upg(800000000,8000000)">800 М ⭐</button></div>
     <div class="it" style="border-color:#fbbf24"><div><b>👑 Властелин Вселенной (+60 000 000)</b><br><small>Максимальный буст</small></div><button class="btn gld" onclick="upg(5000000000,60000000)">5 МЛРД ⭐</button></div>
 </div>
+<div id="s-nft" class="scr">
+    <div class="it"><div class="lf"><svg class="ic" viewBox="0 0 64 64"><circle cx="18" cy="18" r="9" fill="#92400e"/><circle cx="46" cy="18" r="9" fill="#92400e"/><circle cx="32" cy="34" r="20" fill="#b45309"/><circle cx="32" cy="39" r="9" fill="#fde68a"/></svg><div><b>Плюшевый мишка</b><br><small>+5 / сек</small></div></div><button class="btn" onclick="nft(500,5)">500 ⭐</button></div>
+    <div class="it"><div class="lf"><svg class="ic" viewBox="0 0 64 64"><path fill="#38bdf8" d="M32 6c12 10 16 26 12 40H20C16 32 20 16 32 6z"/><path fill="#f97316" d="M24 46l8 12 8-12z"/></svg><div><b>Космо-ракета</b><br><small>+600 / сек</small></div></div><button class="btn" onclick="nft(50000,600)">50 000 ⭐</button></div>
+    <div class="it"><div class="lf"><svg class="ic" viewBox="0 0 64 64"><polygon points="20,10 44,10 56,26 32,56 8,26" fill="#a855f7"/><polygon points="20,10 44,10 32,26" fill="#e9d5ff"/></svg><div><b>Кибер-алмаз NFT</b><br><small>+45 000 / сек</small></div></div><button class="btn" onclick="nft(4000000,45000)">4 М ⭐</button></div>
+    <div class="it"><div class="lf"><svg class="ic" viewBox="0 0 64 64"><path fill="#fbbf24" d="M16 12h32v16c0 10-7 18-16 18s-16-8-16-18V12z"/><rect x="26" y="46" width="12" height="8" fill="#d97706"/></svg><div><b>Золотой Кубок NFT</b><br><small>+1 200 000 / сек</small></div></div><button class="btn gld" onclick="nft(120000000,1200000)">120 М ⭐</button></div>
+    <div class="it" style="border-color:#fbbf24"><div class="lf"><svg class="ic" viewBox="0 0 64 64"><polygon points="32,6 42,24 60,26 46,40 50,58 32,48 14,58 18,40 4,26 22,24" fill="#fde047"/></svg><div><b>Трон Галактики NFT</b><br><small>+55 000 000 / сек</small></div></div><button class="btn gld" onclick="nft(5000000000,55000000)">5 МЛРД ⭐</button></div>
+</div>
+
+<div id="s-don" class="scr">
+    <div class="it"><div><b>1 000 000 StarCoins</b><br><small>Стартовый набор</small></div><button class="btn gld" onclick="don('pack_1m')">5 ⭐️</button></div>
+    <div class="it" style="border-color:#38bdf8"><div><b>5 000 000 StarCoins <span class="tag" style="background:#3b82f6">Выгода</span></b><br><small>В 2.5 раза больше монет</small></div><button class="btn gld" onclick="don('pack_5m')">10 ⭐️</button></div>
+    <div class="it"><div><b>100 000 000 StarCoins</b><br><small>Набор магната</small></div><button class="btn gld" onclick="don('pack_100m')">25 ⭐️</button></div>
+    <div class="it" style="border-color:#fbbf24"><div><b>1 000 000 000 StarCoins <span class="tag">Мега акция!</span></b><br><small>Пакет миллиардера</small></div><button class="btn gld" onclick="don('pack_1b')">50 ⭐️</button></div>
+</div>
+
+<div id="s-top" class="scr"><div id="lb-list"></div></div>
+
+<div class="nav">
+    <div class="tab act" onclick="go('tap',this)">⭐ Тапать</div>
+    <div class="tab" onclick="go('upg',this)">⚡ Бусты</div>
+    <div class="tab" onclick="go('nft',this)">🎁 Подарки</div>
+    <div class="tab" onclick="go('top',this)">🏆 Топ</div>
+    <div class="tab" onclick="go('don',this)">💎 Донат</div>
+</div>
+
+<script>
+const BOT_USER = "Lemonardy_bot";
+const tg = window.Telegram?.WebApp;
+if (tg) tg.expand();
+
+let s = { b: 0, p: 1, i: 0, sec: 0 };
+try { s = Object.assign(s, JSON.parse(localStorage.getItem('sc_v8'))); } catch(e) {}
+
+const q = new URLSearchParams(location.search);
+const bonus = Number(q.get('bonus') || 0), tx = q.get('tx');
+if (bonus > 0 && tx && localStorage.getItem('tx') !== tx) {
+    s.b += bonus; localStorage.setItem('tx', tx);
+}
+
+function fmt(n) {
+    if (n >= 1e9) return (n / 1e9).toFixed(2) + ' МЛРД';
+    if (n >= 1e6) return (n / 1e6).toFixed(2) + ' М';
+    return Math.floor(n).toLocaleString();
+}
+
+function render() {
+    document.getElementById('bal').textContent = fmt(s.b);
+    document.getElementById('pwr').textContent = fmt(s.p);
+    document.getElementById('inc').textContent = fmt(s.i);
+    document.getElementById('hrs').textContent = (s.sec / 3600).toFixed(1);
+    try { localStorage.setItem('sc_v8', JSON.stringify(s)); } catch(e) {}
+}
+
+function drawTop() {
+    const me = tg?.initDataUnsafe?.user?.first_name || 'Вы';
+    const list = [
+        { name: 'CryptoKing', b: 14500000000, h: 142.5 },
+        { name: 'StarWhale', b: 6200000000, h: 89.2 },
+        { name: 'DurovFan', b: 1850000000, h: 54.0 },
+        { name: 'MoonTapper', b: 420000000, h: 31.4 },
+        { name: me + ' (Вы)', b: s.b, h: +(s.sec / 3600).toFixed(1), me: true }
+    ].sort((a, b) => b.b - a.b);
+
+    document.getElementById('lb-list').innerHTML = list.map((u, idx) => `
+        <div class="it" style="${u.me ? 'border-color:#fbbf24' : ''}">
+            <div class="lf">
+                <div class="rk rk${idx + 1}">${idx + 1}</div>
+                <div><b>${u.name}</b><br><small>⏱ В игре: ${u.h} ч</small></div>
+            </div>
+            <b>${fmt(u.b)} ⭐</b>
+        </div>
+    `).join('');
+}
+
+document.getElementById('star').addEventListener('pointerdown', (e) => {
+    s.b += s.p; render();
+    if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+    const el = document.createElement('div');
+    el.className = 'flt'; el.textContent = '+' + fmt(s.p);
+    el.style.left = (e.clientX - 15) + 'px'; el.style.top = (e.clientY - 60) + 'px';
+    document.getElementById('s-tap').appendChild(el);
+    setTimeout(() => el.remove(), 700);
+});
+
+function rst() {
+    const ok = () => { s = { b: 0, p: 1, i: 0, sec: 0 }; render(); drawTop(); };
+    if (tg?.showConfirm) tg.showConfirm('Сбросить весь прогресс?', r => { if (r) ok(); });
+    else if (confirm('Сбросить весь прогресс?')) ok();
+}
+function upg(c, p) {
+    if (s.b < c) return tg?.showAlert ? tg.showAlert('Не хватает StarCoins!') : alert('Не хватает StarCoins!');
+    s.b -= c; s.p += p; render();
+}
+function nft(c, i) {
+    if (s.b < c) return tg?.showAlert ? tg.showAlert('Не хватает StarCoins!') : alert('Не хватает StarCoins!');
+    s.b -= c; s.i += i; render();
+}
+function don(pack) {
+    const url = `https://t.me{BOT_USER}?start=${pack}`;
+    if (tg?.openTelegramLink) tg.openTelegramLink(url);
+    else window.open(url, '_blank');
+}
+function go(id, el) {
+    document.querySelectorAll('.scr').forEach(x => x.classList.remove('act'));
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('act'));
+    document.getElementById('s-' + id).classList.add('act'); el.classList.add('act');
+    if (id === 'top') drawTop();
+}
+
+setInterval(() => { s.sec += 1; if (s.i > 0) s.b += s.i; render(); }, 1000);
+render();
+</script>
+</body>
+</html>
+
