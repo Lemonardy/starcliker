@@ -18,14 +18,19 @@ html,body{margin:0;padding:0;width:100%;height:100dvh;overflow:hidden;font-famil
 .scr{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px 10px 105px;display:none}
 .scr.act{display:flex;flex-direction:column}
 #s-tap{align-items:center;justify-content:center;position:relative;overflow:hidden;padding-bottom:85px}
+.carousel{display:flex;align-items:center;justify-content:center;gap:14px;width:100%;position:relative}
+.arr{background:rgba(30,41,59,.85);border:1px solid rgba(251,191,36,.35);color:#fbbf24;width:38px;height:38px;border-radius:50%;font-size:18px;font-weight:900;display:flex;align-items:center;justify-content:center;z-index:5}
 .glow{position:absolute;width:210px;height:210px;border-radius:50%;pointer-events:none;transition:background .3s}
-.star{width:170px;height:170px;transition:transform .25s ease;touch-action:manipulation}
+.star-wrap{perspective:800px;touch-action:pan-y}
+.star{width:170px;height:170px;transition:transform .45s cubic-bezier(.22,1,.36,1);touch-action:manipulation;transform-style:preserve-3d}
 .star.tap{transform:scale(.9)}
-.star.spin{animation:spin .45s ease}
-@keyframes spin{0%{transform:rotateY(0)}100%{transform:rotateY(360deg)}}
-.colors{display:flex;gap:8px;margin-top:16px;z-index:5}
-.c-btn{background:rgba(30,41,59,.88);border:1px solid rgba(148,163,184,.3);color:#fff;padding:7px 10px;border-radius:12px;font-size:11px;font-weight:700;text-align:center;min-width:66px}
-.c-btn.act{border-color:#fbbf24;background:rgba(251,191,36,.22);color:#fde047}
+.star.spin-l{animation:spinL .55s cubic-bezier(.22,1,.36,1)}
+.star.spin-r{animation:spinR .55s cubic-bezier(.22,1,.36,1)}
+@keyframes spinL{0%{transform:rotateY(0) scale(1)}50%{transform:rotateY(-180deg) scale(1.12)}100%{transform:rotateY(-360deg) scale(1)}}
+@keyframes spinR{0%{transform:rotateY(0) scale(1)}50%{transform:rotateY(180deg) scale(1.12)}100%{transform:rotateY(360deg) scale(1)}}
+.st-title{margin-top:10px;font-size:14px;font-weight:800;color:#e2e8f0}
+.evo-btn{margin-top:10px;background:linear-gradient(45deg,#3b82f6,#8b5cf6);color:#fff;border:1px solid rgba(255,255,255,.3);padding:9px 16px;border-radius:13px;font-weight:800;font-size:12px;box-shadow:0 4px 18px rgba(139,92,246,.45)}
+.evo-btn.owned{background:rgba(34,197,94,.2);border-color:#22c55e;color:#86efac;box-shadow:none}
 .flt{position:absolute;font-size:22px;font-weight:900;color:#fde047;pointer-events:none;animation:up .65s ease-out forwards}
 @keyframes up{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-80px) scale(1.15)}}
 .it{background:rgba(30,41,59,.88);border:1px solid rgba(148,163,184,.22);border-radius:12px;padding:9px 10px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-shrink:0}
@@ -53,13 +58,19 @@ html,body{margin:0;padding:0;width:100%;height:100dvh;overflow:hidden;font-famil
 
 <div id="s-tap" class="scr act">
     <div class="glow" id="glow"></div>
-    <svg class="star" id="star" viewBox="0 0 100 100">
-        <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop id="c1" offset="0%" stop-color="#fef08a"/><stop id="c2" offset="50%" stop-color="#f59e0b"/><stop id="c3" offset="100%" stop-color="#b45309"/></linearGradient></defs>
-        <path id="st-path" fill="url(#g)" d="M50 6 L63 34 L94 38 L71 59 L77 90 L50 75 L23 90 L29 59 L6 38 L37 34 Z" stroke="#fde047" stroke-width="2" stroke-linejoin="round"/>
-    </svg>
-    <div class="colors" id="colors"></div>
+    <div class="carousel" id="swipe-area">
+        <button class="arr" onclick="shiftStar(-1)">◀</button>
+        <div class="star-wrap">
+            <svg class="star" id="star" viewBox="0 0 100 100">
+                <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop id="c1" offset="0%" stop-color="#fef08a"/><stop id="c2" offset="50%" stop-color="#f59e0b"/><stop id="c3" offset="100%" stop-color="#b45309"/></linearGradient></defs>
+                <path id="st-path" fill="url(#g)" d="M50 6 L63 34 L94 38 L71 59 L77 90 L50 75 L23 90 L29 59 L6 38 L37 34 Z" stroke="#fde047" stroke-width="2" stroke-linejoin="round"/>
+            </svg>
+        </div>
+        <button class="arr" onclick="shiftStar(1)">▶</button>
+    </div>
+    <div class="st-title" id="st-title">🟡 Жёлтая звезда (x1)</div>
+    <button class="evo-btn" id="evo-btn" onclick="evo()"></button>
 </div>
-
 <div id="s-upg" class="scr"></div>
 <div id="s-nft" class="scr"></div>
 <div id="s-top" class="scr">
@@ -90,7 +101,7 @@ html,body{margin:0;padding:0;width:100%;height:100dvh;overflow:hidden;font-famil
 
 <script>
 const DB_URL = "https://starcoins-d91b8-default-rtdb.firebaseio.com";
-const ADMIN_USER = "Tipo_Dim";
+const ADMIN_CONTACT = "@Tipo_Dim"; // Напишите сюда ваш @username или имя в Telegram
 const tg = window.Telegram?.WebApp;
 if (tg) { tg.ready(); tg.expand(); }
 
@@ -98,8 +109,8 @@ const uid = tg?.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : (
     const id = Math.floor(Math.random() * 1e9); localStorage.setItem('gid', id); return id;
 })()));
 
-let s = { b: 0, p: 1, i: 0, sec: 0, lv: 0, paint: 0, nick: '', used: [] };
-const KEYS = ['sc_v35', 'sc_v30', 'sc_v27', 'sc_v24', 'sc_v22', 'sc_v20', 'sc_ios', 'sc_v11', 'sc_v10', 'sc_v8'];
+let s = { b: 0, p: 1, i: 0, sec: 0, lv: 0, nick: '', used: [] };
+const KEYS = ['sc_v40', 'sc_v35', 'sc_v30', 'sc_v27', 'sc_v24', 'sc_v22', 'sc_v20', 'sc_ios', 'sc_v11', 'sc_v10', 'sc_v8'];
 for (const k of KEYS) {
     try {
         const raw = localStorage.getItem(k);
@@ -107,26 +118,26 @@ for (const k of KEYS) {
             const old = JSON.parse(raw);
             if (old && (old.b > 0 || old.p > 1 || old.i > 0 || old.lv > 0)) {
                 s = Object.assign(s, old);
-                if (s.paint === undefined) s.paint = s.lv;
                 if (!Array.isArray(s.used)) s.used = [];
                 break;
             }
         }
     } catch(e) {}
 }
+let viewLv = s.lv;
 
 if (!s.nick) {
     const u = tg?.initDataUnsafe?.user;
     s.nick = u?.username ? '@' + u.username : (u?.first_name || 'Игрок #' + uid.slice(-4));
 }
 
-const PROMOS = { 'STAR100': 100000000, 'MEGA1B': 1000000000, 'KING100B': 100000000000, 'GOD5T': 5000000000000 };
+const PROMOS = { 'STAR100': 1000000000, 'KING100B': 100000000000, 'GOD5T': 5000000000000 };
 
 const STARS = [
-    { ico: '🟡', mul: 1, cost: 0, c1: '#fef08a', c2: '#f59e0b', c3: '#b45309', str: '#fde047', gl: 'rgba(251,191,36,.32)' },
-    { ico: '🔵', mul: 2, cost: 100000000000, c1: '#bae6fd', c2: '#0284c7', c3: '#1e3a8a', str: '#38bdf8', gl: 'rgba(56,189,248,.35)' },
-    { ico: '🟢', mul: 3, cost: 5000000000000, c1: '#bbf7d0', c2: '#16a34a', c3: '#14532d', str: '#4ade80', gl: 'rgba(74,222,128,.35)' },
-    { ico: '🟣', mul: 5, cost: 100000000000000, c1: '#f3e8ff', c2: '#9333ea', c3: '#3b0764', str: '#c084fc', gl: 'rgba(192,132,252,.42)' }
+    { ico: '🟡', name: 'Жёлтая звезда', mul: 1, cost: 0, c1: '#fef08a', c2: '#f59e0b', c3: '#b45309', str: '#fde047', gl: 'rgba(251,191,36,.32)' },
+    { ico: '🔵', name: 'Синяя звезда', mul: 2, cost: 100000000000, c1: '#bae6fd', c2: '#0284c7', c3: '#1e3a8a', str: '#38bdf8', gl: 'rgba(56,189,248,.35)' },
+    { ico: '🟢', name: 'Зелёная звезда', mul: 3, cost: 5000000000000, c1: '#bbf7d0', c2: '#16a34a', c3: '#14532d', str: '#4ade80', gl: 'rgba(74,222,128,.35)' },
+    { ico: '🟣', name: 'Фиолетовая звезда', mul: 5, cost: 100000000000000, c1: '#f3e8ff', c2: '#9333ea', c3: '#3b0764', str: '#c084fc', gl: 'rgba(192,132,252,.42)' }
 ];
 
 const UPGS = [
@@ -142,10 +153,9 @@ const NFTS = [
     ['🛸 Флот Галактики NFT', 7500000000, 500000000000], ['🌌 Сердце Вселенной NFT', 180000000000, 10000000000000]
 ];
 const DON_PACKS = [
-    ['💎 100 000 000 StarCoins', 'Оплата подарком в ЛС админу', '5 ⭐️'],
-    ['🚀 1 000 000 000 StarCoins', 'Оплата подарком в ЛС админу', '15 ⭐️'],
-    ['👑 100 000 000 000 StarCoins', 'Хватит на Синюю звезду x2', '35 ⭐️'],
-    ['🌌 5 000 000 000 000 StarCoins', 'Хватит на Зелёную звезду x3', '75 ⭐️']
+    ['🚀 1 000 000 000 StarCoins', 'Подарок мишка/сердце в ТГ', '15 ⭐️'],
+    ['👑 100 000 000 000 StarCoins', 'На Синюю звезду (x2)', '25 ⭐️'],
+    ['🌌 5 000 000 000 000 StarCoins', 'На Зелёную звезду (x3)', '50 ⭐️']
 ];
 
 function fmt(n) {
@@ -157,14 +167,12 @@ function fmt(n) {
 
 document.getElementById('s-upg').innerHTML = UPGS.map(u => `<div class="it"><div class="it-txt"><b>${u[0]}</b><small>+${fmt(u[1])} за клик</small></div><button class="btn" onclick="buy(${u[2]},${u[1]},0)">${fmt(u[2])} ⭐</button></div>`).join('');
 document.getElementById('s-nft').innerHTML = NFTS.map(n => `<div class="it"><div class="it-txt"><b>${n[0]}</b><small>+${fmt(n[1])} / сек</small></div><button class="btn gld" onclick="buy(${n[2]},0,${n[1]})">${fmt(n[2])} ⭐</button></div>`).join('');
-document.getElementById('don-list').innerHTML = DON_PACKS.map((d, i) => `<div class="it" style="${i>=2?'border-color:#fbbf24':''}"><div class="it-txt"><b>${d[0]}</b><small>${d[1]}</small></div><button class="btn gld" onclick="buyStars()">${d[2]}</button></div>`).join('');
+document.getElementById('don-list').innerHTML = DON_PACKS.map((d, i) => `<div class="it" style="${i===2?'border-color:#fbbf24':''}"><div class="it-txt"><b>${d[0]}</b><small>${d[1]}</small></div><button class="btn gld" onclick="buyStars('${d[0]}','${d[2]}')">${d[2]}</button></div>`).join('');
 
-function buyStars() {
-    const clean = ADMIN_USER.replace('@', '').trim();
-    if (!clean || clean === 'ВАШ_НИК_БЕЗ_СОБАЧКИ') return alert('Админ не указал свой ник в ADMIN_USER');
-    const url = `https://t.me{clean}`;
-    if (tg?.openTelegramLink) tg.openTelegramLink(url);
-    else location.href = url;
+function buyStars(pack, price) {
+    const msg = `Для покупки «${pack}» (${price}):\n\n1. Отправьте подарок на ${price} в Telegram пользователю ${ADMIN_CONTACT}\n2. Напишите ему, и он пришлёт промокод для активации ниже!`;
+    if (tg?.showAlert) tg.showAlert(msg);
+    else alert(msg);
 }
 
 function togglePromo() {
@@ -176,34 +184,43 @@ function usePromo() {
     const inp = document.getElementById('promo-in');
     const code = inp.value.trim().toUpperCase();
     if (!code) return;
-    if (s.used.includes(code)) return alert('Код уже использован!');
-    if (!PROMOS[code]) return alert('Неверный промокод!');
+    if (s.used.includes(code)) return tg?.showAlert ? tg.showAlert('Код уже использован!') : alert('Код уже использован!');
+    if (!PROMOS[code]) return tg?.showAlert ? tg.showAlert('Неверный промокод!') : alert('Неверный промокод!');
     s.b += PROMOS[code]; s.used.push(code); inp.value = '';
     render(); sync();
-    alert(`Начислено +${fmt(PROMOS[code])} StarCoins!`);
+    if (tg?.showAlert) tg.showAlert(`Начислено +${fmt(PROMOS[code])} StarCoins!`);
+    else alert(`Начислено +${fmt(PROMOS[code])} StarCoins!`);
 }
 
-function pickStar(idx) {
-    const stEl = document.getElementById('star');
-    if (idx <= s.lv) {
-        s.paint = idx;
-        stEl.classList.remove('spin'); void stEl.offsetWidth; stEl.classList.add('spin');
-        if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
-        render(); return;
-    }
-    if (idx !== s.lv + 1) return alert('Сначала откройте предыдущую звезду!');
-    const nxt = STARS[idx];
-    if (s.b < nxt.cost) return alert(`Нужно ${fmt(nxt.cost)} StarCoins!`);
-    if (confirm(`Открыть звезду x${nxt.mul}? Монеты, бусты и подарки обнулятся!`)) {
-        s.lv = idx; s.paint = idx; s.b = 0; s.p = 1; s.i = 0;
-        stEl.classList.remove('spin'); void stEl.offsetWidth; stEl.classList.add('spin');
-        render(); sync();
-    }
+function shiftStar(dir) {
+    viewLv = (viewLv + dir + STARS.length) % STARS.length;
+    const el = document.getElementById('star');
+    el.classList.remove('spin-l', 'spin-r'); void el.offsetWidth;
+    el.classList.add(dir > 0 ? 'spin-l' : 'spin-r');
+    if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
+    render();
+}
+
+let txStart = 0;
+const sw = document.getElementById('swipe-area');
+sw.addEventListener('touchstart', e => { txStart = e.changedTouches[0].screenX; }, { passive: true });
+sw.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].screenX - txStart;
+    if (Math.abs(dx) > 40) shiftStar(dx < 0 ? 1 : -1);
+}, { passive: true });
+
+function evo() {
+    if (viewLv !== s.lv + 1) return;
+    const nxt = STARS[viewLv];
+    if (s.b < nxt.cost) return tg?.showAlert ? tg.showAlert(`Нужно ${fmt(nxt.cost)} StarCoins!`) : alert(`Нужно ${fmt(nxt.cost)} StarCoins!`);
+    const goEvo = () => { s.lv = viewLv; s.b = 0; s.p = 1; s.i = 0; render(); sync(); };
+    if (tg?.showConfirm) tg.showConfirm(`Открыть ${nxt.name} (x${nxt.mul})? Монеты, бусты и подарки обнулятся!`, r => { if (r) goEvo(); });
+    else if (confirm(`Открыть ${nxt.name}? Монеты, бусты и подарки обнулятся!`)) goEvo();
 }
 
 function render() {
     const cur = STARS[s.lv] || STARS[0];
-    const vis = STARS[s.paint !== undefined ? s.paint : s.lv] || cur;
+    const vw = STARS[viewLv] || cur;
     document.getElementById('st-ico').textContent = cur.ico;
     document.getElementById('bal').textContent = fmt(s.b);
     document.getElementById('mul').textContent = cur.mul;
@@ -211,18 +228,25 @@ function render() {
     document.getElementById('inc').textContent = fmt(s.i * cur.mul);
     document.getElementById('hrs').textContent = (s.sec / 3600).toFixed(1);
 
-    document.getElementById('c1').setAttribute('stop-color', vis.c1);
-    document.getElementById('c2').setAttribute('stop-color', vis.c2);
-    document.getElementById('c3').setAttribute('stop-color', vis.c3);
-    document.getElementById('st-path').setAttribute('stroke', vis.str);
-    document.getElementById('glow').style.background = `radial-gradient(circle,${vis.gl} 0%,transparent 70%)`;
+    document.getElementById('c1').setAttribute('stop-color', vw.c1);
+    document.getElementById('c2').setAttribute('stop-color', vw.c2);
+    document.getElementById('c3').setAttribute('stop-color', vw.c3);
+    document.getElementById('st-path').setAttribute('stroke', vw.str);
+    document.getElementById('glow').style.background = `radial-gradient(circle,${vw.gl} 0%,transparent 70%)`;
+    document.getElementById('st-title').textContent = `${vw.ico} ${vw.name} (x${vw.mul})`;
 
-    document.getElementById('colors').innerHTML = STARS.map((st, i) => {
-        const sub = i <= s.lv ? `x${st.mul}` : fmt(st.cost);
-        return `<button class="c-btn ${s.paint === i ? 'act' : ''}" onclick="pickStar(${i})">${st.ico}<br>${sub}</button>`;
-    }).join('');
-
-    try { localStorage.setItem('sc_v35', JSON.stringify(s)); } catch(e) {}
+    const eb = document.getElementById('evo-btn');
+    if (viewLv <= s.lv) {
+        eb.className = 'evo-btn owned';
+        eb.textContent = viewLv === s.lv ? '✅ Активна сейчас' : '✅ Открыта';
+    } else if (viewLv === s.lv + 1) {
+        eb.className = 'evo-btn';
+        eb.textContent = `⬆️ Купить за ${fmt(vw.cost)} ⭐`;
+    } else {
+        eb.className = 'evo-btn owned';
+        eb.textContent = `🔒 Сначала откройте ${STARS[viewLv - 1].name}`;
+    }
+    try { localStorage.setItem('sc_v40', JSON.stringify(s)); } catch(e) {}
 }
 
 async function sync() {
@@ -265,6 +289,7 @@ async function drawTop() {
 
 document.getElementById('star').addEventListener('pointerdown', (e) => {
     e.preventDefault();
+    if (viewLv !== s.lv) { viewLv = s.lv; render(); }
     const stEl = document.getElementById('star');
     stEl.classList.add('tap'); setTimeout(() => stEl.classList.remove('tap'), 70);
     const gain = s.p * (STARS[s.lv]?.mul || 1);
@@ -278,11 +303,13 @@ document.getElementById('star').addEventListener('pointerdown', (e) => {
 });
 
 function buy(c, p, i) {
-    if (s.b < c) return alert('Не хватает StarCoins!');
+    if (s.b < c) return tg?.showAlert ? tg.showAlert('Не хватает StarCoins!') : alert('Не хватает StarCoins!');
     s.b -= c; s.p += p; s.i += i; render(); sync();
 }
 function rst() {
-    if (confirm('Сбросить прогресс?')) { s = { b: 0, p: 1, i: 0, sec: 0, lv: 0, paint: 0, nick: s.nick, used: s.used }; render(); sync().then(drawTop); }
+    const ok = () => { s = { b: 0, p: 1, i: 0, sec: 0, lv: 0, nick: s.nick, used: s.used }; viewLv = 0; render(); sync().then(drawTop); };
+    if (tg?.showConfirm) tg.showConfirm('Сбросить прогресс?', r => { if (r) ok(); });
+    else if (confirm('Сбросить прогресс?')) ok();
 }
 function go(id, el) {
     document.querySelectorAll('.scr').forEach(x => x.classList.remove('act'));
