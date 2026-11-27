@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -9,66 +10,56 @@
 *{box-sizing:border-box;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
 input{-webkit-user-select:text;user-select:text}
 html,body{margin:0;padding:0;width:100%;height:100dvh;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,sans-serif;color:#fff;display:flex;flex-direction:column;background:radial-gradient(ellipse at 50% 0%,#2e1065 0%,#0f172a 48%,#030712 100%)}
-.top{padding:12px 14px 6px;text-align:center;position:relative;flex-shrink:0}
-.rst{position:absolute;right:12px;top:14px;background:rgba(239,68,68,.2);border:1px solid rgba(239,68,68,.5);color:#fca5a5;border-radius:10px;padding:6px 9px;font-size:12px}
-.box{display:inline-flex;align-items:center;gap:8px;background:rgba(15,23,42,.75);border:1px solid rgba(251,191,36,.45);padding:7px 20px;border-radius:99px;box-shadow:0 0 24px rgba(251,191,36,.25)}
-.bal{font-size:25px;font-weight:900;color:#fbbf24}
-.sub{font-size:12px;color:#cbd5e1;margin-top:6px}
-.scr{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px 12px 115px;display:none}
+.top{padding:10px 12px 6px;text-align:center;position:relative;flex-shrink:0}
+.rst{position:absolute;right:10px;top:12px;background:rgba(239,68,68,.2);border:1px solid rgba(239,68,68,.5);color:#fca5a5;border-radius:9px;padding:5px 8px;font-size:11px}
+.box{display:inline-flex;align-items:center;gap:6px;background:rgba(15,23,42,.8);border:1px solid rgba(251,191,36,.45);padding:6px 16px;border-radius:99px;box-shadow:0 0 20px rgba(251,191,36,.25)}
+.bal{font-size:22px;font-weight:900;color:#fbbf24}
+.sub{font-size:11px;color:#cbd5e1;margin-top:5px}
+.scr{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px 10px 105px;display:none}
 .scr.act{display:flex;flex-direction:column}
-#s-tap{align-items:center;justify-content:center;position:relative;overflow:hidden;padding-bottom:90px}
-.carousel{display:flex;align-items:center;justify-content:center;gap:14px;width:100%;position:relative}
-.arr{background:rgba(30,41,59,.8);border:1px solid rgba(251,191,36,.35);color:#fbbf24;width:38px;height:38px;border-radius:50%;font-size:18px;font-weight:900;display:flex;align-items:center;justify-content:center;z-index:5}
-.glow{position:absolute;width:220px;height:220px;border-radius:50%;pointer-events:none;transition:background .3s}
-.star-wrap{perspective:800px;touch-action:pan-y}
-.star{width:175px;height:175px;transition:transform .45s cubic-bezier(.22,1,.36,1),filter .3s;touch-action:manipulation;transform-style:preserve-3d}
+#s-tap{align-items:center;justify-content:center;position:relative;overflow:hidden;padding-bottom:85px}
+.glow{position:absolute;width:210px;height:210px;border-radius:50%;pointer-events:none;transition:background .3s}
+.star{width:170px;height:170px;transition:transform .35s cubic-bezier(.22,1,.36,1);touch-action:manipulation}
 .star.tap{transform:scale(.9)}
-.star.spin-l{animation:spinL .55s cubic-bezier(.22,1,.36,1)}
-.star.spin-r{animation:spinR .55s cubic-bezier(.22,1,.36,1)}
-@keyframes spinL{0%{transform:rotateY(0) scale(1)}50%{transform:rotateY(-180deg) scale(1.12)}100%{transform:rotateY(-360deg) scale(1)}}
-@keyframes spinR{0%{transform:rotateY(0) scale(1)}50%{transform:rotateY(180deg) scale(1.12)}100%{transform:rotateY(360deg) scale(1)}}
-.st-title{margin-top:10px;font-size:14px;font-weight:800;color:#e2e8f0}
-.evo-btn{margin-top:10px;background:linear-gradient(45deg,#3b82f6,#8b5cf6);color:#fff;border:1px solid rgba(255,255,255,.3);padding:10px 18px;border-radius:14px;font-weight:800;font-size:13px;box-shadow:0 4px 18px rgba(139,92,246,.45)}
-.evo-btn.owned{background:rgba(34,197,94,.2);border-color:#22c55e;color:#86efac;box-shadow:none}
-.flt{position:absolute;font-size:24px;font-weight:900;color:#fde047;pointer-events:none;animation:up .65s ease-out forwards}
-@keyframes up{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-85px) scale(1.2)}}
-.it{background:rgba(30,41,59,.85);border:1px solid rgba(148,163,184,.22);border-radius:14px;padding:10px 12px;margin-bottom:9px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-shrink:0}
-.lf{display:flex;align-items:center;gap:10px;min-width:0}
-.btn{background:#2563eb;color:#fff;border:none;padding:9px 12px;border-radius:10px;font-weight:700;font-size:12px;white-space:nowrap;flex-shrink:0}
+.star.spin{animation:spin .45s ease}
+@keyframes spin{0%{transform:rotateY(0)}100%{transform:rotateY(360deg)}}
+.colors{display:flex;gap:8px;margin-top:16px;z-index:5}
+.c-btn{background:rgba(30,41,59,.85);border:1px solid rgba(148,163,184,.3);color:#fff;padding:7px 10px;border-radius:12px;font-size:11px;font-weight:700;text-align:center}
+.c-btn.act{border-color:#fbbf24;background:rgba(251,191,36,.2);color:#fde047}
+.flt{position:absolute;font-size:22px;font-weight:900;color:#fde047;pointer-events:none;animation:up .65s ease-out forwards}
+@keyframes up{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-80px) scale(1.15)}}
+.it{background:rgba(30,41,59,.88);border:1px solid rgba(148,163,184,.22);border-radius:12px;padding:9px 10px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-shrink:0}
+.it-txt{min-width:0;flex:1}
+.it-txt b{font-size:13px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.it-txt small{font-size:11px;color:#94a3b8}
+.lf{display:flex;align-items:center;gap:8px;min-width:0;flex:1}
+.btn{background:#2563eb;color:#fff;border:none;padding:8px 10px;border-radius:9px;font-weight:700;font-size:11px;white-space:nowrap;flex-shrink:0}
 .gld{background:linear-gradient(45deg,#f59e0b,#fbbf24);color:#000}
-.tag{background:#ef4444;color:#fff;font-size:10px;padding:2px 5px;border-radius:6px;margin-left:4px;font-weight:800}
-.nick-bar{display:flex;gap:8px;margin-bottom:10px;flex-shrink:0}
-.nick-in{flex:1;background:#0f172a;border:1px solid #334155;color:#fff;padding:9px 12px;border-radius:10px;font-size:14px}
-.rk{width:26px;height:26px;border-radius:8px;background:#334155;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0}
+.tag{background:#ef4444;color:#fff;font-size:9px;padding:2px 4px;border-radius:5px;margin-left:4px;font-weight:800}
+.nick-bar{display:flex;gap:6px;margin-bottom:8px;flex-shrink:0}
+.nick-in{flex:1;min-width:0;background:#0f172a;border:1px solid #334155;color:#fff;padding:8px 10px;border-radius:9px;font-size:13px}
+.rk{width:24px;height:24px;border-radius:7px;background:#334155;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;flex-shrink:0}
 .rk1{background:#fbbf24;color:#000}.rk2{background:#cbd5e1;color:#000}.rk3{background:#ea580c;color:#fff}
-.nav{position:fixed;left:10px;right:10px;bottom:calc(24px + env(safe-area-inset-bottom));display:flex;background:rgba(15,23,42,.97);border:1px solid rgba(251,191,36,.45);border-radius:18px;padding:9px 4px;z-index:99;box-shadow:0 8px 25px rgba(0,0,0,.7)}
-.tab{flex:1;text-align:center;font-size:11px;color:#94a3b8;padding:4px 2px}
+.nav{position:fixed;left:8px;right:8px;bottom:calc(18px + env(safe-area-inset-bottom));display:flex;background:rgba(15,23,42,.97);border:1px solid rgba(251,191,36,.45);border-radius:16px;padding:8px 2px;z-index:99;box-shadow:0 8px 25px rgba(0,0,0,.7)}
+.tab{flex:1;text-align:center;font-size:10px;color:#94a3b8;padding:3px 1px}
 .tab.act{color:#fbbf24;font-weight:700}
 </style>
 </head>
 <body>
 <div class="top">
     <button class="rst" onclick="rst()">🗑️ Сброс</button>
-    <div class="box"><span id="st-ico" style="font-size:22px">🟡</span><span class="bal" id="bal">0</span></div>
-    <div class="sub">Множитель: <b>x<span id="mul">1</span></b> | Клик: +<span id="pwr">1</span> | Доход: +<span id="inc">0</span>/с | ⏱ <span id="hrs">0.0</span> ч</div>
+    <div class="box"><span id="st-ico" style="font-size:20px">🟡</span><span class="bal" id="bal">0</span></div>
+    <div class="sub">Множ: <b>x<span id="mul">1</span></b> | Клик: +<span id="pwr">1</span> | Доход: +<span id="inc">0</span>/с | ⏱ <span id="hrs">0.0</span>ч</div>
 </div>
 
 <div id="s-tap" class="scr act">
     <div class="glow" id="glow"></div>
-    <div class="carousel" id="swipe-area">
-        <button class="arr" onclick="shiftStar(-1)">◀</button>
-        <div class="star-wrap">
-            <svg class="star" id="star" viewBox="0 0 100 100">
-                <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop id="c1" offset="0%" stop-color="#fef08a"/><stop id="c2" offset="50%" stop-color="#f59e0b"/><stop id="c3" offset="100%" stop-color="#b45309"/></linearGradient></defs>
-                <path id="st-path" fill="url(#g)" d="M50 6 L63 34 L94 38 L71 59 L77 90 L50 75 L23 90 L29 59 L6 38 L37 34 Z" stroke="#fde047" stroke-width="2" stroke-linejoin="round"/>
-            </svg>
-        </div>
-        <button class="arr" onclick="shiftStar(1)">▶</button>
-    </div>
-    <div class="st-title" id="st-title">🟡 Жёлтая звезда (x1)</div>
-    <button class="evo-btn" id="evo-btn" onclick="evo()"></button>
+    <svg class="star" id="star" viewBox="0 0 100 100">
+        <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop id="c1" offset="0%" stop-color="#fef08a"/><stop id="c2" offset="50%" stop-color="#f59e0b"/><stop id="c3" offset="100%" stop-color="#b45309"/></linearGradient></defs>
+        <path id="st-path" fill="url(#g)" d="M50 6 L63 34 L94 38 L71 59 L77 90 L50 75 L23 90 L29 59 L6 38 L37 34 Z" stroke="#fde047" stroke-width="2" stroke-linejoin="round"/>
+    </svg>
+    <div class="colors" id="colors"></div>
 </div>
-
 <div id="s-upg" class="scr"></div>
 <div id="s-nft" class="scr"></div>
 <div id="s-top" class="scr">
@@ -85,11 +76,10 @@ html,body{margin:0;padding:0;width:100%;height:100dvh;overflow:hidden;font-famil
     <div class="tab" onclick="go('upg',this)">⚡ Бусты</div>
     <div class="tab" onclick="go('nft',this)">🎁 Подарки</div>
     <div class="tab" onclick="go('top',this)">🏆 Топ</div>
-    <div class="tab" onclick="go('don',this)">💎 Донат</div>
+    <div class="tab" onclick="go('don',this)">💎 Бонусы</div>
 </div>
 
 <script>
-const BOT_USER = "Lemonardy_bot";
 const DB_URL = "https://starcoins-d91b8-default-rtdb.firebaseio.com";
 const tg = window.Telegram?.WebApp;
 if (tg) { tg.ready(); tg.expand(); }
@@ -98,23 +88,32 @@ const uid = tg?.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : (
     const id = Math.floor(Math.random() * 1e9); localStorage.setItem('gid', id); return id;
 })()));
 
-let s = { b: 0, p: 1, i: 0, sec: 0, lv: 0, nick: '' };
-try { s = Object.assign(s, JSON.parse(localStorage.getItem('sc_v22'))); } catch(e) {}
+let s = { b: 0, p: 1, i: 0, sec: 0, lv: 0, paint: 0, nick: '' };
+const KEYS = ['sc_v24', 'sc_v22', 'sc_v20', 'sc_ios', 'sc_v11', 'sc_v10', 'sc_v8'];
+for (const k of KEYS) {
+    try {
+        const raw = localStorage.getItem(k);
+        if (raw) {
+            const old = JSON.parse(raw);
+            if (old && (old.b > 0 || old.p > 1 || old.i > 0 || old.lv > 0)) {
+                s = Object.assign(s, old);
+                if (s.paint === undefined) s.paint = s.lv;
+                break;
+            }
+        }
+    } catch(e) {}
+}
+
 if (!s.nick) {
     const u = tg?.initDataUnsafe?.user;
     s.nick = u?.username ? '@' + u.username : (u?.first_name || 'Игрок #' + uid.slice(-4));
 }
-let viewLv = s.lv;
-
-const q = new URLSearchParams(location.search);
-const bonus = Number(q.get('bonus') || 0), tx = q.get('tx');
-if (bonus > 0 && tx && localStorage.getItem('tx') !== tx) { s.b += bonus; localStorage.setItem('tx', tx); }
 
 const STARS = [
-    { ico: '🟡', name: 'Жёлтая звезда', mul: 1, cost: 0, c1: '#fef08a', c2: '#f59e0b', c3: '#b45309', str: '#fde047', gl: 'rgba(251,191,36,.3)' },
-    { ico: '🔵', name: 'Синяя звезда', mul: 2, cost: 100000000000, c1: '#bae6fd', c2: '#0284c7', c3: '#1e3a8a', str: '#38bdf8', gl: 'rgba(56,189,248,.35)' },
-    { ico: '🟢', name: 'Зелёная звезда', mul: 3, cost: 5000000000000, c1: '#bbf7d0', c2: '#16a34a', c3: '#14532d', str: '#4ade80', gl: 'rgba(74,222,128,.35)' },
-    { ico: '🟣', name: 'Фиолетовая звезда', mul: 5, cost: 100000000000000, c1: '#f3e8ff', c2: '#9333ea', c3: '#3b0764', str: '#c084fc', gl: 'rgba(192,132,252,.4)' }
+    { ico: '🟡', mul: 1, cost: 0, c1: '#fef08a', c2: '#f59e0b', c3: '#b45309', str: '#fde047', gl: 'rgba(251,191,36,.32)' },
+    { ico: '🔵', mul: 2, cost: 100000000000, c1: '#bae6fd', c2: '#0284c7', c3: '#1e3a8a', str: '#38bdf8', gl: 'rgba(56,189,248,.35)' },
+    { ico: '🟢', mul: 3, cost: 5000000000000, c1: '#bbf7d0', c2: '#16a34a', c3: '#14532d', str: '#4ade80', gl: 'rgba(74,222,128,.35)' },
+    { ico: '🟣', mul: 5, cost: 100000000000000, c1: '#f3e8ff', c2: '#9333ea', c3: '#3b0764', str: '#c084fc', gl: 'rgba(192,132,252,.42)' }
 ];
 
 const UPGS = [
@@ -129,45 +128,60 @@ const NFTS = [
     ['🏆 Золотой Кубок NFT', 1200000, 120000000], ['👑 Трон Галактики NFT', 55000000, 5000000000],
     ['🛸 Флот Галактики NFT', 7500000000, 500000000000], ['🌌 Сердце Вселенной NFT', 180000000000, 10000000000000]
 ];
-const DONS = [
-    ['1 000 000 StarCoins', 'pack_1m', '5 ⭐️', ''],
-    ['5 000 000 StarCoins', 'pack_5m', '10 ⭐️', 'Выгода'],
-    ['100 000 000 StarCoins', 'pack_100m', '25 ⭐️', ''],
-    ['1 000 000 000 StarCoins', 'pack_1b', '50 ⭐️', 'Мега акция!']
+const PACKS = [
+    ['🎁 Стартовый бонус', '+10 000 000 StarCoins', 10000000, 'Бесплатно'],
+    ['💎 Набор Магната', '+500 000 000 StarCoins', 500000000, 'Забрать'],
+    ['🚀 Мега-буст пак', '+25 000 000 000 StarCoins', 25000000000, 'Забрать'],
+    ['👑 Пак Императора', '+1 000 000 000 000 StarCoins', 1000000000000, 'Мега']
 ];
 
 function fmt(n) {
     if (n >= 1e12) return (n / 1e12).toFixed(1) + ' ТРЛН';
-    if (n >= 1e9) return (n / 1e9).toFixed(2) + ' МЛРД';
-    if (n >= 1e6) return (n / 1e6).toFixed(2) + ' М';
+    if (n >= 1e9) return (n / 1e9).toFixed(1) + ' МЛРД';
+    if (n >= 1e6) return (n / 1e6).toFixed(1) + ' М';
     return Math.floor(n).toLocaleString();
 }
 
-document.getElementById('s-upg').innerHTML = UPGS.map(u => `<div class="it"><div><b>${u}</b><br><small>+${fmt(u)} за клик</small></div><button class="btn" onclick="buy(${u},${u},0)">${fmt(u)} ⭐</button></div>`).join('');
-document.getElementById('s-nft').innerHTML = NFTS.map(n => `<div class="it"><div><b>${n}</b><br><small>+${fmt(n)} / сек</small></div><button class="btn gld" onclick="buy(${n},0,${n})">${fmt(n)} ⭐</button></div>`).join('');
-document.getElementById('s-don').innerHTML = DONS.map(d => `<div class="it" style="${d?'border-color:#fbbf24':''}"><div><b>${d}${d?`<span class="tag">${d}</span>`:''}</b></div><button class="btn gld" onclick="don('${d}')">${d}</button></div>`).join('');
+document.getElementById('s-upg').innerHTML = UPGS.map(u => `
+    <div class="it"><div class="it-txt"><b>${u}</b><small>+${fmt(u)} за клик</small></div><button class="btn" onclick="buy(${u},${u},0)">${fmt(u)} ⭐</button></div>
+`).join('');
 
-function shiftStar(dir) {
-    viewLv = (viewLv + dir + STARS.length) % STARS.length;
-    const el = document.getElementById('star');
-    el.classList.remove('spin-l', 'spin-r');
-    void el.offsetWidth;
-    el.classList.add(dir > 0 ? 'spin-l' : 'spin-r');
-    if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
-    render();
+document.getElementById('s-nft').innerHTML = NFTS.map(n => `
+    <div class="it"><div class="it-txt"><b>${n}</b><small>+${fmt(n)} / сек</small></div><button class="btn gld" onclick="buy(${n},0,${n})">${fmt(n)} ⭐</button></div>
+`).join('');
+
+document.getElementById('s-don').innerHTML = PACKS.map((d, idx) => `
+    <div class="it" style="border-color:#fbbf24"><div class="it-txt"><b>${d}</b><small>${d}</small></div><button class="btn gld" onclick="claim(${idx})">${d}</button></div>
+`).join('');
+
+function pickStar(idx) {
+    const stEl = document.getElementById('star');
+    if (idx <= s.lv) {
+        s.paint = idx;
+        stEl.classList.remove('spin'); void stEl.offsetWidth; stEl.classList.add('spin');
+        if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
+        render();
+        return;
+    }
+    if (idx !== s.lv + 1) {
+        return tg?.showAlert ? tg.showAlert('Сначала откройте предыдущую звезду!') : alert('Сначала откройте предыдущую звезду!');
+    }
+    const nxt = STARS[idx];
+    if (s.b < nxt.cost) {
+        return tg?.showAlert ? tg.showAlert(`Нужно ${fmt(nxt.cost)} StarCoins!`) : alert(`Нужно ${fmt(nxt.cost)} StarCoins!`);
+    }
+    const doUpgrade = () => {
+        s.lv = idx; s.paint = idx; s.b = 0; s.p = 1; s.i = 0;
+        stEl.classList.remove('spin'); void stEl.offsetWidth; stEl.classList.add('spin');
+        render(); sync();
+    };
+    if (tg?.showConfirm) tg.showConfirm(`Открыть звезду x${nxt.mul}? Монеты, бусты и подарки обнулятся!`, r => { if (r) doUpgrade(); });
+    else if (confirm(`Открыть звезду x${nxt.mul}? Монеты, бусты и подарки обнулятся!`)) doUpgrade();
 }
-
-let txStart = 0;
-const sw = document.getElementById('swipe-area');
-sw.addEventListener('touchstart', e => { txStart = e.changedTouches.screenX; }, { passive: true });
-sw.addEventListener('touchend', e => {
-    const dx = e.changedTouches.screenX - txStart;
-    if (Math.abs(dx) > 40) shiftStar(dx < 0 ? 1 : -1);
-}, { passive: true });
 
 function render() {
     const cur = STARS[s.lv] || STARS;
-    const vw = STARS[viewLv] || cur;
+    const vis = STARS[s.paint !== undefined ? s.paint : s.lv] || cur;
     document.getElementById('st-ico').textContent = cur.ico;
     document.getElementById('bal').textContent = fmt(s.b);
     document.getElementById('mul').textContent = cur.mul;
@@ -175,34 +189,26 @@ function render() {
     document.getElementById('inc').textContent = fmt(s.i * cur.mul);
     document.getElementById('hrs').textContent = (s.sec / 3600).toFixed(1);
 
-    document.getElementById('c1').setAttribute('stop-color', vw.c1);
-    document.getElementById('c2').setAttribute('stop-color', vw.c2);
-    document.getElementById('c3').setAttribute('stop-color', vw.c3);
-    document.getElementById('st-path').setAttribute('stroke', vw.str);
-    document.getElementById('glow').style.background = `radial-gradient(circle,${vw.gl} 0%,transparent 70%)`;
-    document.getElementById('st-title').textContent = `${vw.ico} ${vw.name} (x${vw.mul})`;
+    document.getElementById('c1').setAttribute('stop-color', vis.c1);
+    document.getElementById('c2').setAttribute('stop-color', vis.c2);
+    document.getElementById('c3').setAttribute('stop-color', vis.c3);
+    document.getElementById('st-path').setAttribute('stroke', vis.str);
+    document.getElementById('glow').style.background = `radial-gradient(circle,${vis.gl} 0%,transparent 70%)`;
 
-    const eb = document.getElementById('evo-btn');
-    if (viewLv <= s.lv) {
-        eb.className = 'evo-btn owned';
-        eb.textContent = viewLv === s.lv ? '✅ Активна сейчас' : '✅ Открыта';
-    } else if (viewLv === s.lv + 1) {
-        eb.className = 'evo-btn';
-        eb.textContent = `⬆️ Купить за ${fmt(vw.cost)} ⭐`;
-    } else {
-        eb.className = 'evo-btn owned';
-        eb.textContent = `🔒 Сначала откройте ${STARS[viewLv - 1].name}`;
-    }
-    try { localStorage.setItem('sc_v22', JSON.stringify(s)); } catch(e) {}
+    document.getElementById('colors').innerHTML = STARS.map((st, i) => {
+        const sub = i <= s.lv ? `x${st.mul}` : fmt(st.cost);
+        return `<button class="c-btn ${s.paint === i ? 'act' : ''}" onclick="pickStar(${i})">${st.ico}<br>${sub}</button>`;
+    }).join('');
+
+    try { localStorage.setItem('sc_v24', JSON.stringify(s)); } catch(e) {}
 }
 
-function evo() {
-    if (viewLv !== s.lv + 1) return;
-    const nxt = STARS[viewLv];
-    if (s.b < nxt.cost) return tg?.showAlert ? tg.showAlert(`Нужно ${fmt(nxt.cost)} StarCoins!`) : alert(`Нужно ${fmt(nxt.cost)} StarCoins!`);
-    const goEvo = () => { s.lv = viewLv; s.b = 0; s.p = 1; s.i = 0; render(); sync(); };
-    if (tg?.showConfirm) tg.showConfirm(`Открыть ${nxt.name} (x${nxt.mul})? Монеты, бусты и подарки обнулятся!`, r => { if (r) goEvo(); });
-    else if (confirm(`Открыть ${nxt.name}? Монеты, бусты и подарки обнулятся!`)) goEvo();
+function claim(idx) {
+    const p = PACKS[idx];
+    s.b += p;
+    render(); sync();
+    if (tg?.showAlert) tg.showAlert(`Зачислено: ${p}!`);
+    else alert(`Зачислено: ${p}!`);
 }
 
 async function sync() {
@@ -236,16 +242,15 @@ async function drawTop() {
         const list = Object.entries(data).map(([id, u]) => ({ id, ...u })).sort((a, b) => (b.b || 0) - (a.b || 0));
         box.innerHTML = list.map((u, idx) => `
             <div class="it" style="${u.id === uid ? 'border-color:#fbbf24' : ''}">
-                <div class="lf"><div class="rk rk${idx + 1}">${idx + 1}</div><div><b>${u.name}</b><br><small>⏱ ${u.h || 0} ч</small></div></div>
-                <b>${fmt(u.b || 0)} ⭐</b>
+                <div class="lf"><div class="rk rk${idx + 1}">${idx + 1}</div><div class="it-txt"><b>${u.name}</b><small>⏱ ${u.h || 0} ч</small></div></div>
+                <b style="font-size:12px">${fmt(u.b || 0)} ⭐</b>
             </div>
         `).join('');
-    } catch(e) { box.innerHTML = '<div style="text-align:center;color:#fca5a5">Проверьте правила Firebase (test mode)</div>'; }
+    } catch(e) { box.innerHTML = '<div style="text-align:center;color:#fca5a5">Проверьте Firebase (test mode)</div>'; }
 }
 
 document.getElementById('star').addEventListener('pointerdown', (e) => {
     e.preventDefault();
-    if (viewLv !== s.lv) { viewLv = s.lv; render(); }
     const stEl = document.getElementById('star');
     stEl.classList.add('tap'); setTimeout(() => stEl.classList.remove('tap'), 70);
     const gain = s.p * (STARS[s.lv]?.mul || 1);
@@ -263,14 +268,9 @@ function buy(c, p, i) {
     s.b -= c; s.p += p; s.i += i; render(); sync();
 }
 function rst() {
-    const ok = () => { s = { b: 0, p: 1, i: 0, sec: 0, lv: 0, nick: s.nick }; viewLv = 0; render(); sync().then(drawTop); };
+    const ok = () => { s = { b: 0, p: 1, i: 0, sec: 0, lv: 0, paint: 0, nick: s.nick }; render(); sync().then(drawTop); };
     if (tg?.showConfirm) tg.showConfirm('Сбросить прогресс?', r => { if (r) ok(); });
     else if (confirm('Сбросить прогресс?')) ok();
-}
-function don(pack) {
-    const url = `https://t.me{BOT_USER}?start=${pack}`;
-    if (tg?.openTelegramLink) { tg.openTelegramLink(url); setTimeout(() => tg.close(), 150); }
-    else location.href = url;
 }
 function go(id, el) {
     document.querySelectorAll('.scr').forEach(x => x.classList.remove('act'));
@@ -286,5 +286,3 @@ sync();
 </script>
 </body>
 </html>
-
-
