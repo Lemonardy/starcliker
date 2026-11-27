@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -35,9 +34,8 @@ html,body{margin:0;padding:0;width:100%;height:100dvh;overflow:hidden;font-famil
 .lf{display:flex;align-items:center;gap:8px;min-width:0;flex:1}
 .btn{background:#2563eb;color:#fff;border:none;padding:8px 10px;border-radius:9px;font-weight:700;font-size:11px;white-space:nowrap;flex-shrink:0}
 .gld{background:linear-gradient(45deg,#f59e0b,#fbbf24);color:#000}
-.tag{background:#ef4444;color:#fff;font-size:9px;padding:2px 4px;border-radius:5px;margin-left:4px;font-weight:800}
-.nick-bar{display:flex;gap:6px;margin-bottom:8px;flex-shrink:0}
-.nick-in{flex:1;min-width:0;background:#0f172a;border:1px solid #334155;color:#fff;padding:8px 10px;border-radius:9px;font-size:13px}
+.row-in{display:flex;gap:6px;margin-bottom:10px;flex-shrink:0}
+.inp{flex:1;min-width:0;background:#0f172a;border:1px solid #334155;color:#fff;padding:8px 10px;border-radius:9px;font-size:13px}
 .rk{width:24px;height:24px;border-radius:7px;background:#334155;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;flex-shrink:0}
 .rk1{background:#fbbf24;color:#000}.rk2{background:#cbd5e1;color:#000}.rk3{background:#ea580c;color:#fff}
 .nav{position:fixed;left:8px;right:8px;bottom:calc(18px + env(safe-area-inset-bottom));display:flex;background:rgba(15,23,42,.97);border:1px solid rgba(251,191,36,.45);border-radius:16px;padding:8px 2px;z-index:99;box-shadow:0 8px 25px rgba(0,0,0,.7)}
@@ -60,27 +58,35 @@ html,body{margin:0;padding:0;width:100%;height:100dvh;overflow:hidden;font-famil
     </svg>
     <div class="colors" id="colors"></div>
 </div>
+
 <div id="s-upg" class="scr"></div>
 <div id="s-nft" class="scr"></div>
 <div id="s-top" class="scr">
-    <div class="nick-bar">
-        <input id="nick-in" class="nick-in" placeholder="Ваш @username...">
+    <div class="row-in">
+        <input id="nick-in" class="inp" placeholder="Ваш @username...">
         <button class="btn gld" onclick="saveNick()">Сохранить</button>
     </div>
     <div id="lb-list"></div>
 </div>
-<div id="s-don" class="scr"></div>
+<div id="s-don" class="scr">
+    <div class="row-in">
+        <input id="promo-in" class="inp" placeholder="Введите промокод...">
+        <button class="btn gld" onclick="usePromo()">Активировать</button>
+    </div>
+    <div id="don-list"></div>
+</div>
 
 <div class="nav">
     <div class="tab act" onclick="go('tap',this)">⭐ Тап</div>
     <div class="tab" onclick="go('upg',this)">⚡ Бусты</div>
     <div class="tab" onclick="go('nft',this)">🎁 Подарки</div>
     <div class="tab" onclick="go('top',this)">🏆 Топ</div>
-    <div class="tab" onclick="go('don',this)">💎 Бонусы</div>
+    <div class="tab" onclick="go('don',this)">💎 Донат</div>
 </div>
 
 <script>
-const DB_URL = "https://starcoins-d91b8-default-rtdb.firebaseio.com";
+const DB_URL = "https://starcoins-d91b8-default-rtdb.firebaseio.com"; // Вставьте ссылку из Firebase
+const ADMIN_USER = "Dmitry Ivliev"; // Ваш юзернейм без @ (куда писать за покупкой кода)
 const tg = window.Telegram?.WebApp;
 if (tg) { tg.ready(); tg.expand(); }
 
@@ -88,8 +94,8 @@ const uid = tg?.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : (
     const id = Math.floor(Math.random() * 1e9); localStorage.setItem('gid', id); return id;
 })()));
 
-let s = { b: 0, p: 1, i: 0, sec: 0, lv: 0, paint: 0, nick: '' };
-const KEYS = ['sc_v24', 'sc_v22', 'sc_v20', 'sc_ios', 'sc_v11', 'sc_v10', 'sc_v8'];
+let s = { b: 0, p: 1, i: 0, sec: 0, lv: 0, paint: 0, nick: '', used: [] };
+const KEYS = ['sc_v27', 'sc_v24', 'sc_v22', 'sc_v20', 'sc_ios', 'sc_v11', 'sc_v10', 'sc_v8'];
 for (const k of KEYS) {
     try {
         const raw = localStorage.getItem(k);
@@ -98,6 +104,7 @@ for (const k of KEYS) {
             if (old && (old.b > 0 || old.p > 1 || old.i > 0 || old.lv > 0)) {
                 s = Object.assign(s, old);
                 if (s.paint === undefined) s.paint = s.lv;
+                if (!Array.isArray(s.used)) s.used = [];
                 break;
             }
         }
@@ -108,6 +115,14 @@ if (!s.nick) {
     const u = tg?.initDataUnsafe?.user;
     s.nick = u?.username ? '@' + u.username : (u?.first_name || 'Игрок #' + uid.slice(-4));
 }
+
+// Секретные промокоды (можете менять названия и суммы здесь)
+const PROMOS = {
+    'START2026': 10000000,       // Бесплатный стартовый код на 10 М
+    'STAR100M': 100000000,       // Код на 100 М
+    'MEGA1B': 1000000000,        // Код на 1 МЛРД
+    'KING100B': 100000000000     // Код на 100 МЛРД
+};
 
 const STARS = [
     { ico: '🟡', mul: 1, cost: 0, c1: '#fef08a', c2: '#f59e0b', c3: '#b45309', str: '#fde047', gl: 'rgba(251,191,36,.32)' },
@@ -128,11 +143,11 @@ const NFTS = [
     ['🏆 Золотой Кубок NFT', 1200000, 120000000], ['👑 Трон Галактики NFT', 55000000, 5000000000],
     ['🛸 Флот Галактики NFT', 7500000000, 500000000000], ['🌌 Сердце Вселенной NFT', 180000000000, 10000000000000]
 ];
-const PACKS = [
-    ['🎁 Стартовый бонус', '+10 000 000 StarCoins', 10000000, 'Бесплатно'],
-    ['💎 Набор Магната', '+500 000 000 StarCoins', 500000000, 'Забрать'],
-    ['🚀 Мега-буст пак', '+25 000 000 000 StarCoins', 25000000000, 'Забрать'],
-    ['👑 Пак Императора', '+1 000 000 000 000 StarCoins', 1000000000000, 'Мега']
+const DON_PACKS = [
+    ['🎁 Бесплатный бонус', 'Промокод: START2026', '10 М ⭐'],
+    ['💎 Пакет 100 МЛН', 'Написать админу за кодом', '5 ⭐️'],
+    ['🚀 Пакет 1 МЛРД', 'Написать админу за кодом', '25 ⭐️'],
+    ['👑 Пакет 100 МЛРД', 'Написать админу за кодом', '50 ⭐️']
 ];
 
 function fmt(n) {
@@ -143,16 +158,44 @@ function fmt(n) {
 }
 
 document.getElementById('s-upg').innerHTML = UPGS.map(u => `
-    <div class="it"><div class="it-txt"><b>${u}</b><small>+${fmt(u)} за клик</small></div><button class="btn" onclick="buy(${u},${u},0)">${fmt(u)} ⭐</button></div>
+    <div class="it"><div class="it-txt"><b>${u[0]}</b><small>+${fmt(u[1])} за клик</small></div><button class="btn" onclick="buy(${u[2]},${u[1]},0)">${fmt(u[2])} ⭐</button></div>
 `).join('');
 
 document.getElementById('s-nft').innerHTML = NFTS.map(n => `
-    <div class="it"><div class="it-txt"><b>${n}</b><small>+${fmt(n)} / сек</small></div><button class="btn gld" onclick="buy(${n},0,${n})">${fmt(n)} ⭐</button></div>
+    <div class="it"><div class="it-txt"><b>${n[0]}</b><small>+${fmt(n[1])} / сек</small></div><button class="btn gld" onclick="buy(${n[2]},0,${n[1]})">${fmt(n[2])} ⭐</button></div>
 `).join('');
 
-document.getElementById('s-don').innerHTML = PACKS.map((d, idx) => `
-    <div class="it" style="border-color:#fbbf24"><div class="it-txt"><b>${d}</b><small>${d}</small></div><button class="btn gld" onclick="claim(${idx})">${d}</button></div>
+document.getElementById('don-list').innerHTML = DON_PACKS.map((d, i) => `
+    <div class="it" style="${i===3?'border-color:#fbbf24':''}">
+        <div class="it-txt"><b>${d[0]}</b><small>${d[1]}</small></div>
+        <button class="btn gld" onclick="${i===0?"document.getElementById('promo-in').value='START2026';usePromo()":"contactAdmin()"}">${d[2]}</button>
+    </div>
 `).join('');
+
+function contactAdmin() {
+    const url = `https://t.me{ADMIN_USER}`;
+    if (tg?.openTelegramLink) tg.openTelegramLink(url);
+    else window.open(url, '_blank');
+}
+
+function usePromo() {
+    const inp = document.getElementById('promo-in');
+    const code = inp.value.trim().toUpperCase();
+    if (!code) return;
+    if (s.used.includes(code)) {
+        return tg?.showAlert ? tg.showAlert('Этот код уже активирован!') : alert('Этот код уже активирован!');
+    }
+    if (!PROMOS[code]) {
+        return tg?.showAlert ? tg.showAlert('Неверный промокод!') : alert('Неверный промокод!');
+    }
+    const add = PROMOS[code];
+    s.b += add;
+    s.used.push(code);
+    inp.value = '';
+    render(); sync();
+    if (tg?.showAlert) tg.showAlert(`Успешно! Начислено +${fmt(add)} StarCoins!`);
+    else alert(`Успешно! Начислено +${fmt(add)} StarCoins!`);
+}
 
 function pickStar(idx) {
     const stEl = document.getElementById('star');
@@ -160,8 +203,7 @@ function pickStar(idx) {
         s.paint = idx;
         stEl.classList.remove('spin'); void stEl.offsetWidth; stEl.classList.add('spin');
         if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
-        render();
-        return;
+        render(); return;
     }
     if (idx !== s.lv + 1) {
         return tg?.showAlert ? tg.showAlert('Сначала откройте предыдущую звезду!') : alert('Сначала откройте предыдущую звезду!');
@@ -180,7 +222,7 @@ function pickStar(idx) {
 }
 
 function render() {
-    const cur = STARS[s.lv] || STARS;
+    const cur = STARS[s.lv] || STARS[0];
     const vis = STARS[s.paint !== undefined ? s.paint : s.lv] || cur;
     document.getElementById('st-ico').textContent = cur.ico;
     document.getElementById('bal').textContent = fmt(s.b);
@@ -200,20 +242,12 @@ function render() {
         return `<button class="c-btn ${s.paint === i ? 'act' : ''}" onclick="pickStar(${i})">${st.ico}<br>${sub}</button>`;
     }).join('');
 
-    try { localStorage.setItem('sc_v24', JSON.stringify(s)); } catch(e) {}
-}
-
-function claim(idx) {
-    const p = PACKS[idx];
-    s.b += p;
-    render(); sync();
-    if (tg?.showAlert) tg.showAlert(`Зачислено: ${p}!`);
-    else alert(`Зачислено: ${p}!`);
+    try { localStorage.setItem('sc_v27', JSON.stringify(s)); } catch(e) {}
 }
 
 async function sync() {
     if (!DB_URL.startsWith('http')) return;
-    const cur = STARS[s.lv] || STARS;
+    const cur = STARS[s.lv] || STARS[0];
     try {
         await fetch(`${DB_URL}/players/${uid}.json`, {
             method: 'PUT',
@@ -235,7 +269,7 @@ async function drawTop() {
     if (!DB_URL.startsWith('http')) { box.innerHTML = '<div style="text-align:center;color:#fca5a5;padding:15px">Укажите DB_URL</div>'; return; }
     box.innerHTML = '<div style="text-align:center;color:#94a3b8;padding:15px">Загрузка...</div>';
     await sync();
-    try {
+        try {
         const res = await fetch(`${DB_URL}/players.json`);
         const data = await res.json();
         if (!data) { box.innerHTML = '<div style="text-align:center;color:#94a3b8">Пока нет игроков</div>'; return; }
@@ -268,7 +302,7 @@ function buy(c, p, i) {
     s.b -= c; s.p += p; s.i += i; render(); sync();
 }
 function rst() {
-    const ok = () => { s = { b: 0, p: 1, i: 0, sec: 0, lv: 0, paint: 0, nick: s.nick }; render(); sync().then(drawTop); };
+    const ok = () => { s = { b: 0, p: 1, i: 0, sec: 0, lv: 0, paint: 0, nick: s.nick, used: s.used }; render(); sync().then(drawTop); };
     if (tg?.showConfirm) tg.showConfirm('Сбросить прогресс?', r => { if (r) ok(); });
     else if (confirm('Сбросить прогресс?')) ok();
 }
